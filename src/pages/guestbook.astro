@@ -1,21 +1,15 @@
 ---
 import SiteShell from '../layouts/SiteShell.astro';
-
-const BOOK = 'https://www.ultraguest.com';
-const BOOK_ID = 'wkb745kh';
+import { GUESTBOOK_EMBED, GUESTBOOK_SIGN } from '../lib/ultraguest';
 ---
 
 <SiteShell title="guestbook - ohrt.dev">
   <div class="guestbook">
-    <a class="guestbook-sign" href={`${BOOK}/sign/${BOOK_ID}`} target="_blank" rel="noopener">
+    <a class="guestbook-sign" href={GUESTBOOK_SIGN} target="_blank" rel="noopener">
       Sign the guestbook
     </a>
     <div class="guestbook-frame">
-      <iframe
-        src={`${BOOK}/embed/${BOOK_ID}?n=50&style=mine`}
-        title="Guestbook messages"
-        referrerpolicy="no-referrer"
-      ></iframe>
+      <iframe src={GUESTBOOK_EMBED} title="Guestbook messages" referrerpolicy="no-referrer"></iframe>
     </div>
   </div>
 </SiteShell>
