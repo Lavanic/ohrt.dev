@@ -4,7 +4,7 @@ export const NAVIGATE: NavItem[] = [
   { name: 'Welcome', href: '/' },
   { name: 'Webmaster', href: '/webmaster/' },
   { name: 'Guestbook', href: '/guestbook/' },
-  { name: 'Links', href: '/links/', construction: true },
+  { name: 'Links', href: '/links/' },
 ];
 
 export const OFFSITE: NavItem[] = [

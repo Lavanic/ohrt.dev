@@ -1,0 +1,74 @@
+---
+import SiteShell from '../layouts/SiteShell.astro';
+
+const ELSEWHERE = [
+  { name: 'GitHub', href: 'https://github.com/Lavanic', icon: 'github' },
+  { name: 'LinkedIn', href: 'https://www.linkedin.com/in/ohrt', icon: 'linkedin' },
+  { name: 'Instagram', href: 'https://www.instagram.com/oliverohrt', icon: 'instagram' },
+  { name: 'YouTube', href: 'https://www.youtube.com/@CalicoCoder', icon: 'youtube' },
+  { name: 'Weblog', href: 'https://blog.ohrt.dev', icon: 'website' },
+  { name: 'Email', href: 'mailto:oliver@theohrts.com', icon: 'email' },
+];
+---
+
+<SiteShell title="links - ohrt.dev">
+  <h2>Find me elsewhere</h2>
+  <ul class="elsewhere">
+    {ELSEWHERE.map(({ name, href, icon }) => (
+      <li>
+        <a href={href} target={href.startsWith('mailto:') ? undefined : '_blank'} rel="noopener" title={name}>
+          <img src={`/icons/social/${icon}@48.png`} width="48" height="48" alt={name} />
+        </a>
+      </li>
+    ))}
+  </ul>
+  <p class="credit">
+    Icons by{' '}
+    <a href="https://github.com/paulrobertlloyd/socialmediaicons" target="_blank" rel="noopener">
+      Paul Robert Lloyd
+    </a>
+    .
+  </p>
+</SiteShell>
+
+<style>
+  .elsewhere {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .elsewhere a {
+    display: block;
+    line-height: 0;
+  }
+
+  .elsewhere img {
+    display: block;
+  }
+
+  .credit {
+    margin-top: 10px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  @media (max-width: 1020px) {
+    .elsewhere {
+      gap: calc(10px / var(--scale));
+    }
+
+    .elsewhere img {
+      width: calc((48px - 8px * var(--phone)) / var(--scale));
+      height: auto;
+    }
+
+    .credit {
+      margin-top: calc(10px / var(--scale));
+      font-size: calc((12px - 3px * var(--phone)) / var(--scale));
+    }
+  }
+</style>
