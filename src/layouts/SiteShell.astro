@@ -57,7 +57,7 @@ let commits: { hash: string; date: string; subject: string }[] = [];
 try {
   const { stdout } = await promisify(execFile)('git', [
     'log',
-    '-10',
+    '-20',
     '--date=format:%m/%d/%y',
     '--format=%h%x1f%ad%x1f%s%x1e',
   ]);
