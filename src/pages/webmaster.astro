@@ -63,6 +63,32 @@ import SiteShell from '../layouts/SiteShell.astro';
     </a>
     , or <a href="/guestbook/">sign the guestbook</a> on your way out.
   </p>
+  <div class="id-buttons">
+    <img src="/stickers/id/american.png" width="86" height="15" alt="American" />
+    <img src="/stickers/id/cascadian.png" width="86" height="15" alt="Cascadian" />
+    <img src="/stickers/id/college-student.png" width="86" height="15" alt="College student" />
+    <img src="/stickers/id/programmer.png" width="86" height="15" alt="Programmer" />
+    <img src="/stickers/id/engineer.png" width="86" height="15" alt="Engineer" />
+    <img src="/stickers/id/archivist.png" width="86" height="15" alt="Archivist" />
+    <img src="/stickers/id/explorer.png" width="86" height="15" alt="Explorer" />
+    <img src="/stickers/id/gnu-linux.png" width="86" height="15" alt="GNU/Linux" />
+    <img src="/stickers/id/git.png" width="86" height="15" alt="Git" />
+    <img src="/stickers/id/firefox.png" width="86" height="15" alt="Firefox" />
+    <img src="/stickers/id/java.png" width="86" height="15" alt="Java" />
+    <img src="/stickers/id/c.png" width="86" height="15" alt="C" />
+    <img src="/stickers/id/rust.png" width="86" height="15" alt="Rust" />
+    <img src="/stickers/id/lua.png" width="86" height="15" alt="Lua" />
+    <img src="/stickers/id/sql.png" width="86" height="15" alt="SQL" />
+    <img src="/stickers/id/javascript.png" width="86" height="15" alt="JavaScript" />
+    <img src="/stickers/id/typescript.png" width="86" height="15" alt="TypeScript" />
+    <img src="/stickers/id/html5.png" width="86" height="15" alt="HTML5" />
+    <img src="/stickers/id/css3.png" width="86" height="15" alt="CSS3" />
+    <img src="/stickers/id/elden-ring.png" width="86" height="15" alt="Elden Ring" />
+    <img src="/stickers/id/ffxiv.png" width="86" height="15" alt="FFXIV Player" />
+    <img src="/stickers/id/smash-bros-brawl.png" width="86" height="15" alt="Super Smash Bros Brawl" />
+    <img src="/stickers/id/solarpunk.png" width="86" height="15" alt="Solarpunk" />
+    <img src="/stickers/id/cowboy.png" width="86" height="15" alt="Cowboy" />
+  </div>
 </SiteShell>
 
 <style>
@@ -93,6 +119,29 @@ import SiteShell from '../layouts/SiteShell.astro';
     letter-spacing: 1px;
   }
 
+  .id-buttons {
+    --btn-gap: 3px;
+    clear: both;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--btn-gap);
+    margin-top: 24px;
+  }
+
+  .id-buttons img {
+    width: 100%;
+    height: auto;
+    image-rendering: pixelated;
+  }
+
+  .id-buttons img:nth-child(10n + 6),
+  .id-buttons img:nth-child(10n + 7),
+  .id-buttons img:nth-child(10n + 8),
+  .id-buttons img:nth-child(10n + 9),
+  .id-buttons img:nth-child(10n + 10) {
+    transform: translateX(14px);
+  }
+
   @media (max-width: 1020px) {
     .webmaster-photo {
       width: 50%;
@@ -114,6 +163,26 @@ import SiteShell from '../layouts/SiteShell.astro';
       margin: calc((20px - 8px * var(--phone)) / var(--scale)) 0 calc(6px / var(--scale));
       font-size: calc((20px - 9px * var(--phone)) / var(--scale));
       letter-spacing: calc(1px / var(--scale));
+    }
+
+    .id-buttons {
+      --btn-gap: calc(3px / var(--scale));
+      grid-template-columns: repeat(2, 1fr);
+      width: 86%;
+      margin-top: calc(20px / var(--scale));
+    }
+
+    .id-buttons img:nth-child(10n + 6),
+    .id-buttons img:nth-child(10n + 7),
+    .id-buttons img:nth-child(10n + 8),
+    .id-buttons img:nth-child(10n + 9),
+    .id-buttons img:nth-child(10n + 10) {
+      transform: none;
+    }
+
+    .id-buttons img:nth-child(4n + 3),
+    .id-buttons img:nth-child(4n + 4) {
+      transform: translateX(calc(10px / var(--scale)));
     }
   }
 </style>
