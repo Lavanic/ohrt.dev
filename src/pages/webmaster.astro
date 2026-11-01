@@ -65,7 +65,7 @@ import SiteShell from '../layouts/SiteShell.astro';
     </a>
     , or <a href="/guestbook/">sign the guestbook</a> on your way out.
   </p>
-  <div class="id-buttons">
+  <div class="id-buttons no-mobile">
     <img src="/stickers/id/american.png" width="86" height="15" alt="American" />
     <img src="/stickers/id/cascadian.png" width="86" height="15" alt="Cascadian" />
     <img src="/stickers/id/college-student.png" width="86" height="15" alt="College student" />
@@ -165,26 +165,6 @@ import SiteShell from '../layouts/SiteShell.astro';
       margin: calc((20px - 8px * var(--phone)) / var(--scale)) 0 calc(6px / var(--scale));
       font-size: calc((20px - 9px * var(--phone)) / var(--scale));
       letter-spacing: calc(1px / var(--scale));
-    }
-
-    .id-buttons {
-      --btn-gap: calc(3px / var(--scale));
-      grid-template-columns: repeat(2, 1fr);
-      width: 86%;
-      margin-top: calc(20px / var(--scale));
-    }
-
-    .id-buttons img:nth-child(10n + 6),
-    .id-buttons img:nth-child(10n + 7),
-    .id-buttons img:nth-child(10n + 8),
-    .id-buttons img:nth-child(10n + 9),
-    .id-buttons img:nth-child(10n + 10) {
-      transform: none;
-    }
-
-    .id-buttons img:nth-child(4n + 3),
-    .id-buttons img:nth-child(4n + 4) {
-      transform: translateX(calc(10px / var(--scale)));
     }
   }
 </style>
