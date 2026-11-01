@@ -86,3 +86,45 @@ input[type='submit'] {
     0 0 4px #0b2a8a;
   cursor: pointer;
 }
+
+@media (max-width: 600px) {
+  #container {
+    padding: 0 8px;
+  }
+
+  .tableborder {
+    width: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .tableborder,
+  .tableborder tbody,
+  .tableborder tr,
+  .tableborder td {
+    display: block;
+    width: auto;
+  }
+
+  .tableborder td:empty {
+    display: none;
+  }
+
+  .tableborder td.text:first-child {
+    padding-top: 8px;
+  }
+
+  input[type='text'],
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  input[name='remLen'] {
+    width: 4.5em;
+  }
+
+  textarea {
+    height: 10em;
+  }
+}
