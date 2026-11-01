@@ -9,6 +9,7 @@ import { GUESTBOOK_EMBED, GUESTBOOK_SIGN } from '../lib/ultraguest';
       Sign the guestbook
     </a>
     <div class="guestbook-frame">
+      <p class="guestbook-loading">loading the guestbook...</p>
       <iframe src={GUESTBOOK_EMBED} title="Guestbook messages" referrerpolicy="no-referrer"></iframe>
     </div>
   </div>
@@ -59,6 +60,31 @@ import { GUESTBOOK_EMBED, GUESTBOOK_SIGN } from '../lib/ultraguest';
     background: #2e4e70;
   }
 
+  .guestbook-loading {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 15px;
+    letter-spacing: 1px;
+  }
+
+  .guestbook-loading::after {
+    content: '';
+    display: inline-block;
+    width: 1.4em;
+    text-align: left;
+    animation: guestbook-dots 1.2s steps(4) infinite;
+  }
+
+  @keyframes guestbook-dots {
+    to {
+      width: 0;
+    }
+  }
+
   .guestbook-frame iframe {
     position: absolute;
     inset: 0;
@@ -90,6 +116,11 @@ import { GUESTBOOK_EMBED, GUESTBOOK_SIGN } from '../lib/ultraguest';
 
     .guestbook-frame {
       --zoom: calc((17.5 - 5.5 * var(--phone)) / 14);
+    }
+
+    .guestbook-loading {
+      font-size: calc((15px - 4px * var(--phone)) / var(--scale));
+      letter-spacing: calc(1px / var(--scale));
     }
 
     .guestbook-frame iframe {
