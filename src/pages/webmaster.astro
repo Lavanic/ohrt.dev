@@ -28,7 +28,7 @@ import SiteShell from '../layouts/SiteShell.astro';
     Off my computer it's reading, cooking, fishing (see above), and music. I'm currently wrapping up Zen and the Art of
     Motorcycle Maintenance by Robert M. Pirsig.
   </p>
-  <h3>About this site</h3>
+  <h2 class="section">About this site</h2>
   <p>
     This site is written in{' '}
     <a href="https://astro.build" target="_blank" rel="noopener">
@@ -51,7 +51,7 @@ import SiteShell from '../layouts/SiteShell.astro';
   <p>
     Still on the list: the Links page, a webring, something for Projects and Services, and actually writing the blog.
   </p>
-  <h3>Find me</h3>
+  <h2 class="section">Find me</h2>
   <p>
     Email me at oliver@theohrts(dot)com, find me on{' '}
     <a href="https://github.com/Lavanic" target="_blank" rel="noopener">
@@ -112,7 +112,7 @@ import SiteShell from '../layouts/SiteShell.astro';
     margin-top: 14px;
   }
 
-  h3 {
+  :global(.panel-content) h2.section {
     clear: left;
     margin: 20px 0 6px;
     font-size: 20px;
@@ -159,7 +159,7 @@ import SiteShell from '../layouts/SiteShell.astro';
       margin-top: calc((14px - 6px * var(--phone)) / var(--scale));
     }
 
-    h3 {
+    :global(.panel-content) h2.section {
       margin: calc((20px - 8px * var(--phone)) / var(--scale)) 0 calc(6px / var(--scale));
       font-size: calc((20px - 9px * var(--phone)) / var(--scale));
       letter-spacing: calc(1px / var(--scale));
