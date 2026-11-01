@@ -340,11 +340,13 @@ try {
       <script>
         import { GUESTBOOK_EMBED } from '../lib/ultraguest';
 
-        let prefetched = false;
+        const FRESH_FOR = 4 * 60 * 1000;
+        let prefetchedAt = 0;
 
         const prefetchGuestbook = () => {
-          if (prefetched) return;
-          prefetched = true;
+          if (Date.now() - prefetchedAt < FRESH_FOR) return;
+          prefetchedAt = Date.now();
+          document.querySelector(`link[rel="prefetch"][href="${GUESTBOOK_EMBED}"]`)?.remove();
           const link = document.createElement('link');
           link.rel = 'prefetch';
           link.href = GUESTBOOK_EMBED;
@@ -354,7 +356,7 @@ try {
         const bind = () => {
           document.querySelectorAll<HTMLAnchorElement>('a[href="/guestbook/"]').forEach((a) => {
             for (const type of ['pointerenter', 'focus', 'touchstart']) {
-              a.addEventListener(type, prefetchGuestbook, { passive: true, once: true });
+              a.addEventListener(type, prefetchGuestbook, { passive: true });
             }
           });
         };
