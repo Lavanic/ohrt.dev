@@ -23,6 +23,10 @@ const stampDir = path.join(process.cwd(), 'public/stamps');
 const stampFiles = (await readdir(stampDir)).filter((f) => /\.(png|gif|jpe?g|webp|avif)$/i.test(f)).sort();
 const stamps = stampFiles.map((f) => `/stamps/${f}`);
 
+const buttonDir = path.join(process.cwd(), 'public/buttons');
+const buttonFiles = (await readdir(buttonDir)).filter((f) => /\.(png|gif|jpe?g|webp|avif)$/i.test(f)).sort();
+const buttons = buttonFiles.map((f) => `/buttons/${f}`);
+
 // The seamless loop works by animating translateX(-50%) across a set rendered twice.
 // That only works if one set is wider than the visible bar (~1300px).
 // So we pad the array up to at least 30 entries before doubling it.
@@ -551,6 +555,13 @@ try {
         });
       </script>
     </div>
+    {buttons.length > 0 && (
+      <div class="row wall" transition:persist="wall" transition:animate="none">
+        {buttons.map((src) => (
+          <img src={src} width="88" height="31" alt="" loading="lazy" decoding="async" />
+        ))}
+      </div>
+    )}
   </div>
   <script>
     let pageScroll: number | null = null;
@@ -748,6 +759,22 @@ try {
 
   .panel-left {
     flex: 0 0 17%;
+  }
+
+  .wall {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px calc((100% - 14 * 88px) / 13);
+    width: 140%;
+    left: -20%;
+    margin-top: calc(8px - var(--gap));
+    position: relative;
+  }
+
+  .wall img {
+    display: block;
+    image-rendering: pixelated;
   }
 
   /* Same bar as the subheaders, sitting at the top of the left panel. */
@@ -1142,6 +1169,26 @@ try {
     /* Right panel is hidden via .no-mobile, so center auto-fills the freed
       space. Extend leftward (width: 110%, all offset on the left side) so
       the left panel pokes past the header on mobile. */
+    .wall {
+      width: 102%;
+      left: -2%;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(calc(88px / var(--scale)), 1fr));
+      gap: calc(4px / var(--scale));
+      margin-top: calc(8px / var(--scale) - var(--gap));
+    }
+
+    .wall img {
+      width: 100%;
+      height: auto;
+    }
+  }
+
+  @media (max-width: 540px) {
+    .wall {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
     .main-row {
       width: 102%;
       left: -2%;
