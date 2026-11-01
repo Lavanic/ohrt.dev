@@ -531,6 +531,16 @@ try {
             .catch(() => {});
         }
 
+        document.addEventListener('astro:after-swap', () => {
+          fetchVisits()
+            .then((visits) => {
+              document.querySelectorAll<HTMLElement>('.nav-hits').forEach((el) => {
+                el.textContent = String(visits);
+              });
+            })
+            .catch(() => {});
+        });
+
         let changelogScroll = 0;
         document.addEventListener('astro:before-swap', () => {
           changelogScroll = document.querySelector('.changelog-list')?.scrollTop ?? 0;
