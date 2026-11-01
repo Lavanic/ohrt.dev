@@ -776,11 +776,17 @@ try {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 4px calc((100% - 14 * 88px) / 13);
+    --wall-gap: 4px;
+    --wall-cols: 13;
+    gap: var(--wall-gap);
     width: 140%;
     left: -20%;
     margin-top: calc(8px - var(--gap));
     position: relative;
+  }
+
+  .wall > * {
+    width: calc((100% - (var(--wall-cols) - 1) * var(--wall-gap)) / var(--wall-cols));
   }
 
   .wall a {
@@ -788,8 +794,13 @@ try {
     line-height: 0;
   }
 
+  .wall a img {
+    width: 100%;
+  }
+
   .wall img {
     display: block;
+    height: auto;
     image-rendering: pixelated;
   }
 
