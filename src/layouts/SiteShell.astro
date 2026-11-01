@@ -557,7 +557,7 @@ try {
       </script>
     </div>
     {buttons.length > 0 && (
-      <div class="row wall" transition:persist="wall" transition:animate="none">
+      <div class="row wall no-mobile" transition:persist="wall" transition:animate="none">
         {buttons.map(({ src, href }) =>
           href ? (
             <a
@@ -1185,36 +1185,9 @@ try {
     /* Right panel is hidden via .no-mobile, so center auto-fills the freed
       space. Extend leftward (width: 110%, all offset on the left side) so
       the left panel pokes past the header on mobile. */
-    .wall {
-      --wall-gap: calc(4px / var(--scale));
-      width: 102%;
-      left: -2%;
-      gap: var(--wall-gap);
-      margin-top: calc(8px / var(--scale) - var(--gap));
-    }
-
-    .wall > * {
-      width: calc(88px / var(--scale));
-    }
-
-    .wall a img {
-      width: 100%;
-    }
-
-    .wall img {
-      height: auto;
-    }
   }
 
   @media (max-width: 540px) {
-    .wall {
-      --wall-gap: calc(3px / var(--scale));
-    }
-
-    .wall > * {
-      width: calc((100% - 6 * var(--wall-gap)) / 7);
-    }
-
     .main-row {
       width: 102%;
       left: -2%;
