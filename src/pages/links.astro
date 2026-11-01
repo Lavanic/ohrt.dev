@@ -7,8 +7,8 @@ const ELSEWHERE = [
   { name: 'Instagram', href: 'https://www.instagram.com/oliverohrt', icon: 'instagram' },
   { name: 'YouTube', href: 'https://www.youtube.com/@CalicoCoder', icon: 'youtube' },
   { name: 'Spotify', href: 'https://open.spotify.com/user/ollie-ohrt', icon: 'spotify' },
-  { name: 'Weblog', href: 'https://blog.ohrt.dev', icon: 'website', desktop: true },
-  { name: 'Email', href: 'mailto:oliver@theohrts.com', icon: 'email', desktop: true },
+  { name: 'Weblog', href: 'https://blog.ohrt.dev', icon: 'website' },
+  { name: 'Email', href: 'mailto:oliver@theohrts.com', icon: 'email' },
 ];
 ---
 
@@ -17,8 +17,8 @@ const ELSEWHERE = [
     <section class="elsewhere-row">
       <h2 class="section">Find me elsewhere:</h2>
       <ul class="elsewhere">
-        {ELSEWHERE.map(({ name, href, icon, desktop }) => (
-          <li class:list={{ 'no-mobile': desktop }}>
+        {ELSEWHERE.map(({ name, href, icon }) => (
+          <li>
             <a href={href} target={href.startsWith('mailto:') ? undefined : '_blank'} rel="noopener" title={name}>
               <img src={`/icons/social/${icon}@48.png`} width="48" height="48" alt={name} />
             </a>
