@@ -1,7 +1,8 @@
 # ohrt.dev
 
 <p align="center">
-  <a href="https://ohrt.dev"><img src=".github/screenshot.webp" width="720" alt="ohrt.dev on a desktop browser"></a>
+  <a href="https://ohrt.dev"><img src=".github/screenshot.webp" height="180" alt="ohrt.dev on a desktop browser"></a>
+  <a href="https://ohrt.dev"><img src=".github/screenshot-phone.webp" height="180" alt="ohrt.dev on a phone"></a>
 </p>
 
 <p align="center">
