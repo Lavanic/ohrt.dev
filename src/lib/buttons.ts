@@ -1,6 +1,5 @@
 export const BUTTON_LINKS: Record<string, string> = {
   '00-upl.gif': 'https://upl.cs.wisc.edu/',
-  'amazon.gif': 'https://www.amazon.com/',
   'archlinux.gif': 'https://archlinux.org/',
   'firefox2.gif': 'https://www.mozilla.org/firefox/',
   'firefoxget.gif': 'https://www.mozilla.org/firefox/',
@@ -26,6 +25,5 @@ export const BUTTON_LINKS: Record<string, string> = {
   'reddit.gif': 'https://www.reddit.com/',
   'rss-button.gif': 'https://blog.ohrt.dev/rss.xml',
   'steam.gif': 'https://store.steampowered.com/',
-  'vim_a.gif': 'https://www.vim.org/',
   'www.gif': 'https://www.w3.org/',
 };
