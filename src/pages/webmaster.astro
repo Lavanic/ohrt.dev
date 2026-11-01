@@ -1,0 +1,119 @@
+---
+import SiteShell from '../layouts/SiteShell.astro';
+---
+
+<SiteShell title="webmaster - ohrt.dev">
+  <img
+    class="webmaster-photo"
+    src="/images/webmaster.webp"
+    width="555"
+    height="629"
+    alt="Oliver on a boat, grinning, holding a fishing rod"
+  />
+  <p>Hi, again. My name is Oliver Ohrt...</p>
+  <p>
+    I was born and raised in the Greater Seattle Area, Issaquah, for those from the region. I've been passionate about
+    everything computers & machines since I could talk. From self-teaching Java at thirteen to graduating with a degree
+    in CS from UW-Madison in December.
+  </p>
+  <p>
+    At Madtown I helped run the{' '}
+    <a href="https://upl.cs.wisc.edu/" target="_blank" rel="noopener">
+      Undergraduate Projects Lab
+    </a>
+    , a student-run lab that has been around since the 1980s, where I planned events and helped put on Wisconsin's
+    largest hackathon, MadHacks. The last two summers I was in Bellevue at Amazon writing internal tools for the AGI org
+  </p>
+  <p>
+    Off my computer it's reading, cooking, fishing (see above), and music. I'm currently wrapping up Zen and the Art of
+    Motorcycle Maintenance by Robert M. Pirsig.
+  </p>
+  <h3>About this site</h3>
+  <p>
+    This site is written in{' '}
+    <a href="https://astro.build" target="_blank" rel="noopener">
+      Astro
+    </a>{' '}
+    and hosted on GitHub Pages, rebuilt by GitHub Actions on every push. The counter, contribution graph, changelog and
+    sticky note are all real and fetched at build time from GoatCounter, GitHub, the git log and status.cafe (once they
+    approve me). The guestbook lives on UltraGuest, the source is on{' '}
+    <a href="https://github.com/Lavanic/ohrt.dev" target="_blank" rel="noopener">
+      GitHub
+    </a>
+  </p>
+  <img
+    class="webmaster-photo-2"
+    src="/images/webmaster-2.webp"
+    width="1370"
+    height="1002"
+    alt="Oliver in sunglasses under a stone arch in Venice"
+  />
+  <p>
+    Still on the list: the Links page, a webring, something for Projects and Services, and actually writing the blog.
+  </p>
+  <h3>Find me</h3>
+  <p>
+    Email me at oliver@theohrts(dot)com, find me on{' '}
+    <a href="https://github.com/Lavanic" target="_blank" rel="noopener">
+      GitHub
+    </a>{' '}
+    or, read the{' '}
+    <a href="https://blog.ohrt.dev" target="_blank" rel="noopener">
+      weblog
+    </a>
+    , or <a href="/guestbook/">sign the guestbook</a> on your way out.
+  </p>
+</SiteShell>
+
+<style>
+  .webmaster-photo {
+    float: left;
+    width: 230px;
+    max-width: 48%;
+    height: auto;
+    margin: 4px 20px 10px 0;
+  }
+
+  .webmaster-photo-2 {
+    float: right;
+    width: 230px;
+    max-width: 48%;
+    height: auto;
+    margin: 4px 0 10px 20px;
+  }
+
+  .webmaster-photo-2 + p {
+    margin-top: 14px;
+  }
+
+  h3 {
+    clear: left;
+    margin: 20px 0 6px;
+    font-size: 20px;
+    letter-spacing: 1px;
+  }
+
+  @media (max-width: 1020px) {
+    .webmaster-photo {
+      width: 50%;
+      max-width: none;
+      margin: calc(4px / var(--scale)) calc(14px / var(--scale)) calc(8px / var(--scale)) 0;
+    }
+
+    .webmaster-photo-2 {
+      width: 50%;
+      max-width: none;
+      margin: calc(4px / var(--scale)) 0 calc(8px / var(--scale)) calc(14px / var(--scale));
+    }
+
+    .webmaster-photo-2 + p {
+      margin-top: calc((14px - 6px * var(--phone)) / var(--scale));
+    }
+
+    h3 {
+      margin: calc((20px - 8px * var(--phone)) / var(--scale)) 0 calc(6px / var(--scale));
+      font-size: calc((20px - 9px * var(--phone)) / var(--scale));
+      letter-spacing: calc(1px / var(--scale));
+    }
+  }
+</style>

@@ -2,7 +2,7 @@ export type NavItem = { name: string; href?: string; construction?: boolean };
 
 export const NAVIGATE: NavItem[] = [
   { name: 'Welcome', href: '/' },
-  { name: 'Webmaster', href: '/webmaster/', construction: true },
+  { name: 'Webmaster', href: '/webmaster/' },
   { name: 'Guestbook', href: '/guestbook/' },
   { name: 'Links', href: '/links/', construction: true },
 ];
