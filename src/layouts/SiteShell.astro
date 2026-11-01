@@ -458,6 +458,12 @@ try {
                 </li>
               ))}
             </ul>
+            <p class="changelog-foot">
+              {commits.length} most recent commits,{' '}
+              <a href={`${REPO}/commits/main`} target="_blank" rel="noopener">
+                see the rest
+              </a>
+            </p>
           </section>
         )}
         <section class="counter" hidden={visits === null}>
@@ -1000,6 +1006,17 @@ try {
   }
 
   .changelog-list a {
+    color: #cfe6ff;
+  }
+
+  .changelog-foot {
+    padding: 6px 10px 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 12px;
+  }
+
+  .changelog-foot a {
     color: #cfe6ff;
   }
 
