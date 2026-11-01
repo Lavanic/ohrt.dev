@@ -122,7 +122,9 @@ const ogImage = new URL('/images/og.jpg', Astro.site);
   body::before {
     content: '';
     position: fixed;
-    inset: 0;
+    inset: 0 0 auto;
+    height: 100vh;
+    height: 100lvh;
     background-image: url('/images/background.webp');
     background-image: image-set(
       url('/images/background.avif') type('image/avif'),
