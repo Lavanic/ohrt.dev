@@ -1,5 +1,6 @@
 ---
 import { NAVIGATE, OFFSITE } from '../lib/nav';
+import { BUTTON_LINKS } from '../lib/buttons';
 import { readdir } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -25,7 +26,7 @@ const stamps = stampFiles.map((f) => `/stamps/${f}`);
 
 const buttonDir = path.join(process.cwd(), 'public/buttons');
 const buttonFiles = (await readdir(buttonDir)).filter((f) => /\.(png|gif|jpe?g|webp|avif)$/i.test(f)).sort();
-const buttons = buttonFiles.map((f) => `/buttons/${f}`);
+const buttons = buttonFiles.map((f) => ({ src: `/buttons/${f}`, href: BUTTON_LINKS[f] }));
 
 // The seamless loop works by animating translateX(-50%) across a set rendered twice.
 // That only works if one set is wider than the visible bar (~1300px).
@@ -557,9 +558,19 @@ try {
     </div>
     {buttons.length > 0 && (
       <div class="row wall" transition:persist="wall" transition:animate="none">
-        {buttons.map((src) => (
-          <img src={src} width="88" height="31" alt="" loading="lazy" decoding="async" />
-        ))}
+        {buttons.map(({ src, href }) =>
+          href ? (
+            <a
+              href={href}
+              target={href.startsWith('/') ? undefined : '_blank'}
+              rel={href.startsWith('/') ? undefined : 'noopener'}
+            >
+              <img src={src} width="88" height="31" alt="" loading="lazy" decoding="async" />
+            </a>
+          ) : (
+            <img src={src} width="88" height="31" alt="" loading="lazy" decoding="async" />
+          ),
+        )}
       </div>
     )}
   </div>
@@ -770,6 +781,11 @@ try {
     left: -20%;
     margin-top: calc(8px - var(--gap));
     position: relative;
+  }
+
+  .wall a {
+    display: block;
+    line-height: 0;
   }
 
   .wall img {
@@ -1177,8 +1193,15 @@ try {
       margin-top: calc(8px / var(--scale) - var(--gap));
     }
 
-    .wall img {
+    .wall > * {
       width: calc(88px / var(--scale));
+    }
+
+    .wall a img {
+      width: 100%;
+    }
+
+    .wall img {
       height: auto;
     }
   }
@@ -1188,7 +1211,7 @@ try {
       --wall-gap: calc(3px / var(--scale));
     }
 
-    .wall img {
+    .wall > * {
       width: calc((100% - 6 * var(--wall-gap)) / 7);
     }
 
