@@ -1,9 +1,10 @@
 ---
 import SiteShell from '../layouts/SiteShell.astro';
+import { constructionPages } from '../lib/nav';
 
 export function getStaticPaths() {
-  return ['Webmaster', 'Links'].map((name) => ({
-    params: { page: name.toLowerCase() },
+  return constructionPages().map(({ name, href }) => ({
+    params: { page: href!.slice(1, -1) },
     props: { name },
   }));
 }

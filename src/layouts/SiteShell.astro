@@ -1,4 +1,5 @@
 ---
+import { NAVIGATE, OFFSITE } from '../lib/nav';
 import { readdir } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -299,26 +300,37 @@ try {
           <span class="visually-hidden">Navigate</span>
         </div>
         <div class="nav">
-          <a class="nav-btn" href="/">
-            Welcome
-          </a>
-          <a class="nav-btn nav-warn" href="/webmaster/">
-            Webmaster
-          </a>
-          <a class="nav-btn" href="/guestbook/">
-            Guestbook
-          </a>
-          <a class="nav-btn nav-warn" href="/links/">
-            Links
-          </a>
+          {NAVIGATE.map(({ name, href, construction }) =>
+            href ? (
+              <a
+                class:list={['nav-btn', { 'nav-warn': construction }]}
+                href={href}
+                target={href.startsWith('http') ? '_blank' : undefined}
+                rel={href.startsWith('http') ? 'noopener' : undefined}
+              >
+                {name}
+              </a>
+            ) : (
+              <div class:list={['nav-btn', { 'nav-warn': construction }]}>{name}</div>
+            ),
+          )}
           <div class="panel-nav nav-offsite">
             <span class="visually-hidden">Offsite</span>
           </div>
-          <a class="nav-btn" href="https://blog.ohrt.dev" target="_blank" rel="noopener">
-            Weblog
-          </a>
-          <div class="nav-btn nav-warn">Projects</div>
-          <div class="nav-btn nav-warn">Services</div>
+          {OFFSITE.map(({ name, href, construction }) =>
+            href ? (
+              <a
+                class:list={['nav-btn', { 'nav-warn': construction }]}
+                href={href}
+                target={href.startsWith('http') ? '_blank' : undefined}
+                rel={href.startsWith('http') ? 'noopener' : undefined}
+              >
+                {name}
+              </a>
+            ) : (
+              <div class:list={['nav-btn', { 'nav-warn': construction }]}>{name}</div>
+            ),
+          )}
         </div>
         <p class="desk-note">
           <i>psst!</i> I look better on ur laptop btw
