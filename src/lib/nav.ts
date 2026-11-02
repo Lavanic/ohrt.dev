@@ -10,7 +10,7 @@ export const NAVIGATE: NavItem[] = [
 export const OFFSITE: NavItem[] = [
   { name: 'Weblog', href: 'https://blog.ohrt.dev' },
   { name: 'Projects', construction: true },
-  { name: 'Services', construction: true },
+  { name: 'Services', href: 'https://status.ohrt.dev'},
 ];
 
 export const constructionPages = () =>
