@@ -29,7 +29,11 @@ try {
           <p class="message-text" set:html={m.html} />
           {m.replies.map((r) => (
             <div class="reply">
-              <strong set:html={r.name} /> <span set:html={r.html} />
+              <div class="message-head">
+                <strong>Oliver replied</strong>
+                <time datetime={new Date(r.time).toISOString()}>{when(r.time)}</time>
+              </div>
+              <p class="message-text" set:html={r.html} />
             </div>
           ))}
         </li>
@@ -140,10 +144,11 @@ try {
   }
 
   .reply {
-    margin-top: 8px;
+    margin-top: 10px;
     padding: 5px;
-    border: 1px solid #7fa3c8;
+    border: 1px solid #000;
     background: #3f6589;
+    color: #fff;
   }
 
   .guestbook-credit {
@@ -200,7 +205,7 @@ try {
     }
 
     .reply {
-      margin-top: calc(6px / var(--scale));
+      margin-top: calc(8px / var(--scale));
       padding: calc(5px / var(--scale));
       border-width: calc(1px / var(--scale));
     }

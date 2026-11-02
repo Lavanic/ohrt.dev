@@ -1,6 +1,6 @@
 export const GUESTBOOK_URL = 'https://ohrt.atabook.org/';
 
-export type Reply = { name: string; time: number; html: string };
+export type Reply = { time: number; html: string };
 export type Message = { name: string; time: number; html: string; replies: Reply[] };
 
 const SMILEY = /^https:\/\/atabook\.org\/images\/smileys\/[\w-]+\.(?:gif|png)$/;
@@ -56,9 +56,9 @@ function parseMessages(page: string): Message[] {
     if (!head || !text) continue;
     const replies: Reply[] = [];
     for (const r of block.matchAll(
-      /<strong>([\s\S]*?)<\/strong>\s*<span class="message-reply-time" data-time="(\d+)"[\s\S]*?<p class="[^"]*(?:answer|reply)[^"]*">([\s\S]*?)<\/p>/g,
+      /<div class="reply">\s*<b>[^<]*<span class="message-reply-time" data-time="(\d+)">[\s\S]*?<p class="message-text">([\s\S]*?)<\/p>/g,
     )) {
-      replies.push({ name: clean(r[1]), time: Number(r[2]), html: clean(r[3]) });
+      replies.push({ time: Number(r[1]), html: clean(r[2]) });
     }
     messages.push({ name: clean(head[1]), time: Number(head[2]), html: clean(text[1]), replies });
   }
