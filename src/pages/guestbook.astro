@@ -14,11 +14,16 @@ try {
 
 <SiteShell title="guestbook - ohrt.dev">
   <div class="guestbook">
-    <p class="guestbook-count">
-      {failed
-        ? 'the messages did not load this time'
-        : `${messages.length} ${messages.length === 1 ? 'message' : 'messages'}`}
-    </p>
+    <div class="guestbook-top">
+      <p class="guestbook-count">
+        {failed
+          ? 'the messages did not load this time'
+          : `${messages.length} ${messages.length === 1 ? 'message' : 'messages'}`}
+      </p>
+      <a class="guestbook-sign" href={GUESTBOOK_URL} target="_blank" rel="noopener">
+        Sign the guestbook
+      </a>
+    </div>
     <ol class="messages">
       {messages.map((m) => (
         <li class="message">
@@ -53,9 +58,6 @@ try {
         atabook
       </a>
     </p>
-    <a class="guestbook-sign" href={GUESTBOOK_URL} target="_blank" rel="noopener">
-      Sign the guestbook
-    </a>
   </div>
 </SiteShell>
 
@@ -76,17 +78,21 @@ try {
     flex-direction: column;
   }
 
+  .guestbook-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+
   .guestbook-count {
-    margin: 0 0 15px;
+    margin: 0;
   }
 
   .guestbook-sign {
-    position: sticky;
-    bottom: 12px;
-    align-self: flex-end;
     display: inline-flex;
     align-items: center;
-    margin: auto -8px -8px 0;
     height: 36px;
     padding: 0 16px;
     border-radius: 4px;
@@ -167,15 +173,12 @@ try {
       min-height: calc(240px / var(--scale));
     }
 
-    .guestbook-count {
+    .guestbook-top {
+      gap: calc(8px / var(--scale));
       margin-bottom: calc(10px / var(--scale));
     }
 
     .guestbook-sign {
-      position: absolute;
-      right: calc(8px / var(--scale));
-      bottom: calc(8px / var(--scale));
-      margin: 0;
       height: calc((34px - 10px * var(--phone)) / var(--scale));
       padding: 0 calc((16px - 7px * var(--phone)) / var(--scale));
       border-radius: calc(4px / var(--scale));
