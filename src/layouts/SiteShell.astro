@@ -354,32 +354,6 @@ try {
           )}
         </p>
       </nav>
-      <script>
-        import { GUESTBOOK_EMBED } from '../lib/ultraguest';
-
-        const FRESH_FOR = 4 * 60 * 1000;
-        let prefetchedAt = 0;
-
-        const prefetchGuestbook = () => {
-          if (Date.now() - prefetchedAt < FRESH_FOR) return;
-          prefetchedAt = Date.now();
-          document.querySelector(`link[rel="prefetch"][href="${GUESTBOOK_EMBED}"]`)?.remove();
-          const link = document.createElement('link');
-          link.rel = 'prefetch';
-          link.href = GUESTBOOK_EMBED;
-          document.head.append(link);
-        };
-
-        const bind = () => {
-          document.querySelectorAll<HTMLAnchorElement>('a[href="/guestbook/"]').forEach((a) => {
-            for (const type of ['pointerenter', 'focus', 'touchstart']) {
-              a.addEventListener(type, prefetchGuestbook, { passive: true });
-            }
-          });
-        };
-
-        document.addEventListener('astro:page-load', bind);
-      </script>
       <main class="box panel panel-center">
         <div class="panel-content">
           <slot />

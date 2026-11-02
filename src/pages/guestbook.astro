@@ -1,24 +1,67 @@
 ---
 import SiteShell from '../layouts/SiteShell.astro';
-import { GUESTBOOK_EMBED, GUESTBOOK_SIGN } from '../lib/ultraguest';
+import { fetchMessages, GUESTBOOK_URL, when, type Message } from '../lib/guestbook';
+
+let messages: Message[] = [];
+let failed = false;
+try {
+  messages = await fetchMessages();
+} catch (err) {
+  failed = true;
+  console.warn(`[guestbook] ${err}, linking to the book instead`);
+}
 ---
 
 <SiteShell title="guestbook - ohrt.dev">
   <div class="guestbook">
-    <a class="guestbook-sign" href={GUESTBOOK_SIGN} target="_blank" rel="noopener">
+    <p class="guestbook-count">
+      {failed
+        ? 'the messages did not load this time'
+        : `${messages.length} ${messages.length === 1 ? 'message' : 'messages'}`}
+    </p>
+    <ol class="messages">
+      {messages.map((m) => (
+        <li class="message">
+          <div class="message-head">
+            <strong set:html={m.name} />
+            <time datetime={new Date(m.time).toISOString()}>{when(m.time)}</time>
+          </div>
+          <p class="message-text" set:html={m.html} />
+          {m.replies.map((r) => (
+            <div class="reply">
+              <strong set:html={r.name} /> <span set:html={r.html} />
+            </div>
+          ))}
+        </li>
+      ))}
+    </ol>
+    <p class="guestbook-credit">
+      {failed && (
+        <>
+          <a href={GUESTBOOK_URL} target="_blank" rel="noopener">
+            read them on atabook
+          </a>
+          ,{' '}
+        </>
+      )}
+      powered by{' '}
+      <a href="https://atabook.org" target="_blank" rel="noopener">
+        atabook
+      </a>
+    </p>
+    <a class="guestbook-sign" href={GUESTBOOK_URL} target="_blank" rel="noopener">
       Sign the guestbook
     </a>
-    <div class="guestbook-frame">
-      <p class="guestbook-loading">loading the guestbook...</p>
-      <iframe src={GUESTBOOK_EMBED} title="Guestbook messages" referrerpolicy="no-referrer"></iframe>
-    </div>
   </div>
 </SiteShell>
 
 <style>
-  :global(.panel-content) {
+  :global(main.panel-center > .panel-content) {
     display: flex;
     flex-direction: column;
+    background:
+      linear-gradient(rgba(53, 87, 122, 0.8), rgba(53, 87, 122, 0.8)),
+      #35577a url('/images/guestbook/background.webp') center top;
   }
 
   .guestbook {
@@ -29,13 +72,17 @@ import { GUESTBOOK_EMBED, GUESTBOOK_SIGN } from '../lib/ultraguest';
     flex-direction: column;
   }
 
+  .guestbook-count {
+    margin: 0 0 15px;
+  }
+
   .guestbook-sign {
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 1;
+    position: sticky;
+    bottom: 12px;
+    align-self: flex-end;
     display: inline-flex;
     align-items: center;
+    margin: auto -8px -8px 0;
     height: 36px;
     padding: 0 16px;
     border-radius: 4px;
@@ -52,48 +99,62 @@ import { GUESTBOOK_EMBED, GUESTBOOK_SIGN } from '../lib/ultraguest';
       inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
 
-  .guestbook-frame {
-    --zoom: calc(16 / 14);
-    position: relative;
-    flex: 1 1 0;
-    min-height: 0;
-    background: #2e4e70;
-  }
-
-  .guestbook-loading {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
+  .messages {
+    list-style: none;
     margin: 0;
-    color: rgba(255, 255, 255, 0.55);
-    font-size: 15px;
-    letter-spacing: 1px;
+    padding: 0;
   }
 
-  .guestbook-loading::after {
-    content: '';
-    display: inline-block;
-    width: 1.4em;
-    text-align: left;
-    animation: guestbook-dots 1.2s steps(4) infinite;
+  .message {
+    margin-bottom: 10px;
+    padding: 5px;
+    border: 1px solid #3f6589;
+    background: #263e66;
+    color: #cfe6ff;
+    overflow: hidden;
   }
 
-  @keyframes guestbook-dots {
-    to {
-      width: 0;
-    }
+  .message-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0 12px;
   }
 
-  .guestbook-frame iframe {
-    position: absolute;
-    inset: 0;
-    width: calc(100% / var(--zoom));
-    height: calc(100% / var(--zoom));
-    border: 0;
-    background: transparent;
-    transform: scale(var(--zoom));
-    transform-origin: 0 0;
+  .message-head time {
+    white-space: nowrap;
+  }
+
+  .message-text {
+    margin: 8px 0 5px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .message-text :global(a) {
+    color: #cfe6ff;
+  }
+
+  .message-text :global(img) {
+    vertical-align: middle;
+  }
+
+  .reply {
+    margin-top: 8px;
+    padding: 5px;
+    border: 1px solid #7fa3c8;
+    background: #3f6589;
+  }
+
+  .guestbook-credit {
+    margin: 15px 0 0;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+  }
+
+  .guestbook-credit a {
+    color: #cfe6ff;
   }
 
   @media (max-width: 1020px) {
@@ -101,10 +162,15 @@ import { GUESTBOOK_EMBED, GUESTBOOK_SIGN } from '../lib/ultraguest';
       min-height: calc(240px / var(--scale));
     }
 
+    .guestbook-count {
+      margin-bottom: calc(10px / var(--scale));
+    }
+
     .guestbook-sign {
-      top: auto;
+      position: absolute;
       right: calc(8px / var(--scale));
       bottom: calc(8px / var(--scale));
+      margin: 0;
       height: calc((34px - 10px * var(--phone)) / var(--scale));
       padding: 0 calc((16px - 7px * var(--phone)) / var(--scale));
       border-radius: calc(4px / var(--scale));
@@ -114,20 +180,34 @@ import { GUESTBOOK_EMBED, GUESTBOOK_SIGN } from '../lib/ultraguest';
         0 0 calc(4px / var(--scale)) #0b2a8a;
     }
 
-    .guestbook-frame {
-      --zoom: calc((17.5 - 5.5 * var(--phone)) / 14);
+    .message {
+      margin-bottom: calc(8px / var(--scale));
+      padding: calc(6px / var(--scale));
+      border-width: calc(1px / var(--scale));
     }
 
-    .guestbook-loading {
+    .message-head {
+      gap: 0 calc(10px / var(--scale));
+    }
+
+    .message-text {
+      margin: calc(6px / var(--scale)) 0 calc(4px / var(--scale));
+    }
+
+    .message-text :global(img) {
+      height: 1.1em;
+      width: auto;
+    }
+
+    .reply {
+      margin-top: calc(6px / var(--scale));
+      padding: calc(5px / var(--scale));
+      border-width: calc(1px / var(--scale));
+    }
+
+    .guestbook-credit {
+      margin-top: calc(12px / var(--scale));
       font-size: calc((15px - 4px * var(--phone)) / var(--scale));
-      letter-spacing: calc(1px / var(--scale));
-    }
-
-    .guestbook-frame iframe {
-      width: calc(100% * var(--scale) / var(--zoom));
-      height: calc(100% * var(--scale) / var(--zoom));
-      transform: scale(calc(var(--zoom) / var(--scale)));
-      transform-origin: 0 0;
     }
   }
 </style>
