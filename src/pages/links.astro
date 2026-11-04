@@ -7,6 +7,7 @@ const ELSEWHERE = [
   { name: 'Instagram', href: 'https://www.instagram.com/oliverohrt', icon: 'instagram' },
   { name: 'YouTube', href: 'https://www.youtube.com/@CalicoCoder', icon: 'youtube' },
   { name: 'Spotify', href: 'https://open.spotify.com/user/ollie-ohrt', icon: 'spotify' },
+  { name: 'Beli', href: 'https://beliapp.co/app/oliverohrt', icon: 'beli' },
   { name: 'Weblog', href: 'https://blog.ohrt.dev', icon: 'website' },
   { name: 'Email', href: 'mailto:oliver@theohrts.com', icon: 'email' },
 ];
@@ -44,12 +45,13 @@ const ELSEWHERE = [
   }
 
   :global(.panel-content) h2.section {
+    flex-shrink: 0;
     margin: 0;
+    white-space: nowrap;
   }
 
   .elsewhere {
     display: flex;
-    flex-wrap: wrap;
     gap: 10px;
     margin: 0;
     padding: 0;
@@ -78,7 +80,12 @@ const ELSEWHERE = [
       gap: calc(10px / var(--scale));
     }
 
+    :global(.panel-content) h2.section {
+      white-space: normal;
+    }
+
     .elsewhere {
+      flex-wrap: wrap;
       gap: calc(10px / var(--scale));
     }
 
