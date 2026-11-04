@@ -8,7 +8,7 @@ import path from 'node:path';
 import BaseLayout from './BaseLayout.astro';
 import { WEEKS, fetchDays, toCells, type Cell } from '../lib/contributions';
 import { fetchVisits, toDigits } from '../lib/goatcounter';
-import { fetchStatus, STATUS_URL, type Status } from '../lib/statuscafe';
+import { fetchStatus, STATUS_URL, STATUS_VIA, timeAgo, type Status } from '../lib/status';
 
 interface Props {
   title?: string;
@@ -52,9 +52,9 @@ try {
 
 let status: Status | null = null;
 try {
-  status = await fetchStatus();
+  status = await fetchStatus(process.env.GITHUB_TOKEN);
 } catch (err) {
-  console.warn(`[statuscafe] ${err}, hiding the note until the browser loads it`);
+  console.warn(`[status] ${err}, hiding the note until the browser loads it`);
 }
 
 const REPO = 'https://github.com/Lavanic/ohrt.dev';
@@ -408,13 +408,16 @@ try {
           href={STATUS_URL}
           target="_blank"
           rel="noopener"
-          title="My status on status.cafe"
+          title="My status, kept in a GitHub Gist"
           hidden={status === null}
         >
           <span class="status-face">{status?.face}</span>
           <span class="status-text">{status?.content}</span>
           <span class="status-meta">
-            via status.cafe · <span class="status-time">{status?.timeAgo}</span>
+            via {STATUS_VIA} ·{' '}
+            <span class="status-time" data-at={status?.updatedAt}>
+              {status && timeAgo(status.updatedAt)}
+            </span>
           </span>
         </a>
         {commits.length > 0 && (
@@ -455,7 +458,7 @@ try {
       <script>
         import { fetchDays, toCells } from '../lib/contributions';
         import { fetchVisits, toDigits } from '../lib/goatcounter';
-        import { fetchStatus } from '../lib/statuscafe';
+        import { fetchStatus, timeAgo } from '../lib/status';
 
         const ghCells = document.querySelectorAll<HTMLElement>('.gh-chart .gh-cell');
 
@@ -500,11 +503,18 @@ try {
         const note = document.querySelector<HTMLElement>('.status');
 
         if (note) {
+          const time = note.querySelector<HTMLElement>('.status-time')!;
+          const tick = () => {
+            if (time.dataset.at) time.textContent = timeAgo(time.dataset.at);
+          };
+          tick();
+          setInterval(tick, 60000);
           fetchStatus()
             .then((status) => {
               note.querySelector('.status-face')!.textContent = status.face;
               note.querySelector('.status-text')!.textContent = status.content;
-              note.querySelector('.status-time')!.textContent = status.timeAgo;
+              time.dataset.at = status.updatedAt;
+              tick();
               note.hidden = false;
             })
             .catch(() => {});
