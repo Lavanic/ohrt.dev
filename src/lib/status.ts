@@ -5,6 +5,10 @@ export const STATUS_VIA = 'gist';
 
 export type Status = { face: string; content: string; updatedAt: string };
 
+const FACES = ['smile', 'wink', 'grin', 'cool', 'yell', 'tongue', 'shock', 'meh', 'sad', 'angry'];
+
+export const faceSrc = (face: string) => (FACES.includes(face) ? `/images/faces/${face}.png` : null);
+
 const UNITS = [
   ['year', 31536000],
   ['month', 2592000],
