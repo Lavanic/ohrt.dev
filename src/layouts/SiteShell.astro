@@ -52,7 +52,7 @@ try {
 
 let status: Status | null = null;
 try {
-  status = await fetchStatus(process.env.GITHUB_TOKEN);
+  status = await fetchStatus();
 } catch (err) {
   console.warn(`[status] ${err}, hiding the note until the browser loads it`);
 }

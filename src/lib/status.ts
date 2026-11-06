@@ -25,9 +25,8 @@ export function timeAgo(iso: string): string {
 
 let pending: Promise<Status> | undefined;
 
-export function fetchStatus(token?: string): Promise<Status> {
+export function fetchStatus(): Promise<Status> {
   pending ??= fetch(`https://api.github.com/gists/${GIST_ID}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
     signal: AbortSignal.timeout(5000),
   })
     .then((res) => {
