@@ -9,7 +9,7 @@ import BaseLayout from './BaseLayout.astro';
 import { WEEKS, fetchDays, toCells, type Cell } from '../lib/contributions';
 import { fetchVisits, toDigits } from '../lib/goatcounter';
 import { faceSrc, fetchStatus, STATUS_URL, STATUS_VIA, timeAgo, type Status } from '../lib/status';
-import { fetchTrackOnce, type Track } from '../lib/lastfm';
+import { fetchTracksOnce, heading, type Track } from '../lib/lastfm';
 
 interface Props {
   title?: string;
@@ -60,12 +60,13 @@ try {
 
 const statusFace = status && faceSrc(status.face);
 
-let track: Track | null = null;
+let tracks: Track[] = [];
 try {
-  track = await fetchTrackOnce();
+  tracks = await fetchTracksOnce();
 } catch (err) {
   console.warn(`[lastfm] ${err}, hiding now playing until the browser loads it`);
 }
+const trackHeading = tracks[0] && heading(tracks[0]);
 
 const REPO = 'https://github.com/Lavanic/ohrt.dev';
 let commits: { hash: string; date: string; subject: string }[] = [];
@@ -347,21 +348,39 @@ try {
             ),
           )}
         </div>
-        <section class="playing no-mobile" hidden={track === null}>
+        <section class="playing no-mobile" hidden={tracks.length === 0}>
           <h3 class="playing-title">
-            Now Playing <small class="playing-state">{track?.playing ? '▶ live' : 'last played'}</small>
+            <span class="playing-label">{trackHeading?.label}</span>
+            <small class="playing-state">{trackHeading?.state}</small>
           </h3>
-          <a class="playing-row" href={track?.url} target="_blank" rel="noopener">
-            {track?.art ? (
-              <img class="playing-art" src={track.art} width="64" height="64" alt="" decoding="async" />
-            ) : (
-              <span class="playing-art" />
-            )}
-            <span class="playing-text">
-              <span class="playing-song">{track?.title}</span>
-              <span class="playing-artist">{track?.artist}</span>
-            </span>
-          </a>
+          <ol class="playing-list">
+            {tracks.map((t) => (
+              <li>
+                <a class="playing-row" href={t.url} target="_blank" rel="noopener">
+                  {t.art ? (
+                    <img class="playing-art" src={t.art} width="64" height="64" alt="" decoding="async" />
+                  ) : (
+                    <span class="playing-art" />
+                  )}
+                  <span class="playing-text">
+                    <span class="playing-song">{t.title}</span>
+                    <span class="playing-artist">{t.artist}</span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ol>
+          <template class="playing-template">
+            <li>
+              <a class="playing-row" target="_blank" rel="noopener">
+                <span class="playing-art"></span>
+                <span class="playing-text">
+                  <span class="playing-song"></span>
+                  <span class="playing-artist"></span>
+                </span>
+              </a>
+            </li>
+          </template>
         </section>
         <p class="desk-note">
           <i>psst!</i> I look better on ur laptop btw
@@ -390,7 +409,7 @@ try {
         // thing I scrobbled. The name baked into the HTML stands on its own,
         // so no key, no JS or a bad response all just leave the paragraph
         // as written.
-        import { fetchArtist, fetchTrack, type Artist, type Track } from '../lib/lastfm';
+        import { fetchArtist, fetchTracks, heading, type Artist, type Track } from '../lib/lastfm';
 
         let artist: Artist | null = null;
 
@@ -403,36 +422,45 @@ try {
 
         document.addEventListener('astro:after-swap', paint);
 
-        let track: Track | null = null;
-        let trackAt = 0;
+        let tracks: Track[] = [];
+        let tracksAt = 0;
 
-        const paintTrack = () => {
+        const paintTracks = () => {
           const box = document.querySelector<HTMLElement>('.playing');
-          if (!box || !track) return;
-          box.querySelector('.playing-state')!.textContent = track.playing ? '▶ live' : 'last played';
-          box.querySelector<HTMLAnchorElement>('.playing-row')!.href = track.url;
-          box.querySelector('.playing-song')!.textContent = track.title;
-          box.querySelector('.playing-artist')!.textContent = track.artist;
-          const art = box.querySelector('.playing-art')!;
-          if (track.art && art.getAttribute('src') !== track.art) {
-            const img = new Image(64, 64);
-            for (const { name, value } of art.attributes) img.setAttribute(name, value);
-            img.src = track.art;
-            img.alt = '';
-            img.decoding = 'async';
-            art.replaceWith(img);
-          }
+          const template = box?.querySelector<HTMLTemplateElement>('.playing-template');
+          if (!box || !template || tracks.length === 0) return;
+          const { label, state } = heading(tracks[0]);
+          box.querySelector('.playing-label')!.textContent = label;
+          box.querySelector('.playing-state')!.textContent = state;
+          box.querySelector('.playing-list')!.replaceChildren(
+            ...tracks.map((t) => {
+              const li = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+              li.querySelector<HTMLAnchorElement>('.playing-row')!.href = t.url;
+              li.querySelector('.playing-song')!.textContent = t.title;
+              li.querySelector('.playing-artist')!.textContent = t.artist;
+              if (t.art) {
+                const blank = li.querySelector('.playing-art')!;
+                const img = new Image(64, 64);
+                for (const { name, value } of blank.attributes) img.setAttribute(name, value);
+                img.src = t.art;
+                img.alt = '';
+                img.decoding = 'async';
+                blank.replaceWith(img);
+              }
+              return li;
+            }),
+          );
           box.hidden = false;
         };
 
-        document.addEventListener('astro:after-swap', paintTrack);
+        document.addEventListener('astro:after-swap', paintTracks);
         document.addEventListener('astro:page-load', () => {
-          if (!document.querySelector('.playing') || Date.now() - trackAt < 60000) return;
-          fetchTrack()
+          if (!document.querySelector('.playing') || Date.now() - tracksAt < 60000) return;
+          fetchTracks()
             .then((latest) => {
-              track = latest;
-              trackAt = Date.now();
-              paintTrack();
+              tracks = latest;
+              tracksAt = Date.now();
+              paintTracks();
             })
             .catch(() => {});
         });
@@ -1030,6 +1058,16 @@ try {
     margin-top: 14px;
   }
 
+  .playing-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .playing-list li + li {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
   .playing[hidden] {
     display: none;
   }
@@ -1045,7 +1083,7 @@ try {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 10px;
+    padding: 7px 10px;
     color: #fff;
     text-decoration: none;
   }
