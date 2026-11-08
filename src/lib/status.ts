@@ -1,4 +1,4 @@
-const GIST_ID = '2a189096280e2c8785263bbb97c2bbb8';
+export const GIST_ID = '2a189096280e2c8785263bbb97c2bbb8';
 
 export const STATUS_URL = `https://gist.github.com/Lavanic/${GIST_ID}`;
 export const STATUS_VIA = 'gist';
@@ -29,9 +29,9 @@ export function timeAgo(iso: string): string {
 
 let pending: Promise<Status> | undefined;
 
-export function fetchStatus(): Promise<Status> {
+export function fetchStatus(timeout = 5000): Promise<Status> {
   pending ??= fetch(`https://api.github.com/gists/${GIST_ID}`, {
-    signal: AbortSignal.timeout(5000),
+    signal: AbortSignal.timeout(timeout),
   })
     .then((res) => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

@@ -8,7 +8,8 @@ import path from 'node:path';
 import BaseLayout from './BaseLayout.astro';
 import { WEEKS, fetchDays, toCells, type Cell } from '../lib/contributions';
 import { fetchVisits, toDigits } from '../lib/goatcounter';
-import { faceSrc, fetchStatus, STATUS_URL, STATUS_VIA, timeAgo, type Status } from '../lib/status';
+import { faceSrc, STATUS_URL, STATUS_VIA, timeAgo, type Status } from '../lib/status';
+import { buildStatus } from '../lib/status-build';
 import { fetchTracksOnce, heading, type Track } from '../lib/lastfm';
 
 interface Props {
@@ -53,7 +54,7 @@ try {
 
 let status: Status | null = null;
 try {
-  status = await fetchStatus();
+  status = await buildStatus();
 } catch (err) {
   console.warn(`[status] ${err}, hiding the note until the browser loads it`);
 }
