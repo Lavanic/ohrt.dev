@@ -421,22 +421,7 @@ try {
         </div>
       </main>
       <script>
-        // Swaps the band name in the about text for the artist of the last
-        // thing I scrobbled. The name baked into the HTML stands on its own,
-        // so no key, no JS or a bad response all just leave the paragraph
-        // as written.
-        import { fetchArtist, fetchTracks, heading, type Artist, type Track } from '../lib/lastfm';
-
-        let artist: Artist | null = null;
-
-        const paint = () => {
-          const artistEl = document.querySelector<HTMLElement>('.lastfm-artist');
-          if (!artistEl || !artist) return;
-          artistEl.textContent = artist.name;
-          if (artist.title) artistEl.title = artist.title;
-        };
-
-        document.addEventListener('astro:after-swap', paint);
+        import { fetchTracks, heading, type Track } from '../lib/lastfm';
 
         let tracks: Track[] = [];
         let tracksAt = 0;
@@ -485,16 +470,6 @@ try {
               tracks = latest;
               tracksAt = Date.now();
               paintTracks();
-            })
-            .catch(() => {});
-        });
-        document.addEventListener('astro:page-load', () => {
-          if (!document.querySelector('.lastfm-artist')) return;
-          fetchArtist()
-            .then((latest) => {
-              if (!latest) return;
-              artist = latest;
-              paint();
             })
             .catch(() => {});
         });

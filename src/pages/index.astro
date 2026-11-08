@@ -1,13 +1,5 @@
 ---
 import SiteShell from '../layouts/SiteShell.astro';
-import { fetchArtist, type Artist } from '../lib/lastfm';
-
-let artist: Artist | null = null;
-try {
-  artist = await fetchArtist();
-} catch (err) {
-  console.warn(`[lastfm] ${err}, keeping the fallback artist`);
-}
 ---
 
 <SiteShell description="Ollie's corner of the web">
