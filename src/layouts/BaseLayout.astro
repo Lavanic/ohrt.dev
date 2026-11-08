@@ -11,6 +11,32 @@ const { title, description = "Oliver's corner of the web." } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL('/images/og.jpg', Astro.site);
+
+const identity = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': 'https://ohrt.dev/#website',
+      name: 'ohrt.dev',
+      url: 'https://ohrt.dev/',
+      author: { '@id': 'https://ohrt.dev/#me' },
+    },
+    {
+      '@type': 'Person',
+      '@id': 'https://ohrt.dev/#me',
+      name: 'Oliver Ohrt',
+      url: 'https://ohrt.dev/',
+      image: 'https://ohrt.dev/images/webmaster.webp',
+      sameAs: [
+        'https://github.com/Lavanic',
+        'https://www.linkedin.com/in/ohrt',
+        'https://www.instagram.com/oliverohrt',
+        'https://blog.ohrt.dev/',
+      ],
+    },
+  ],
+};
 ---
 
 <html lang="en" transition:animate="none">
@@ -48,6 +74,7 @@ const ogImage = new URL('/images/og.jpg', Astro.site);
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="ohrt.dev, with gears in place of the two O's" />
     <meta name="twitter:card" content="summary_large_image" />
+    {Astro.url.pathname === '/' && <script is:inline type="application/ld+json" set:html={JSON.stringify(identity)} />}
     <link rel="preconnect" href="https://github-contributions-api.jogruber.de" crossorigin />
     <link rel="preconnect" href="https://ws.audioscrobbler.com" crossorigin />
     <link rel="preconnect" href={GOATCOUNTER} crossorigin />
