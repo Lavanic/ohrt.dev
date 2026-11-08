@@ -21,7 +21,6 @@ export const BUTTON_LINKS: Record<string, string> = {
   'neovim.gif': 'https://neovim.io/',
   'nvidia.gif': 'https://www.nvidia.com/',
   'pcgamer.gif': 'https://www.pcgamer.com/',
-  'publicdomain.gif': 'https://creativecommons.org/publicdomain/',
   'reddit.gif': 'https://www.reddit.com/',
   'rss-button.gif': 'https://blog.ohrt.dev/rss.xml',
   'steam.gif': 'https://store.steampowered.com/',
