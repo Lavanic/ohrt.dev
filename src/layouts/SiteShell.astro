@@ -28,7 +28,7 @@ const stamps = stampFiles.map((f) => `/stamps/${f}`);
 
 const buttonDir = path.join(process.cwd(), 'public/buttons');
 const buttonFiles = (await readdir(buttonDir)).filter((f) => /\.(png|gif|jpe?g|webp|avif)$/i.test(f)).sort();
-const buttons = buttonFiles.map((f) => ({ src: `/buttons/${f}`, href: BUTTON_LINKS[f] }));
+const buttons = buttonFiles.map((f) => ({ src: `/buttons/${f}`, link: BUTTON_LINKS[f] }));
 
 // The seamless loop works by animating translateX(-50%) across a set rendered twice.
 // That only works if one set is wider than the visible bar (~1300px).
@@ -683,14 +683,14 @@ try {
     </div>
     {buttons.length > 0 && (
       <div class="row wall no-mobile" transition:persist="wall" transition:animate="none">
-        {buttons.map(({ src, href }) =>
-          href ? (
+        {buttons.map(({ src, link }) =>
+          link ? (
             <a
-              href={href}
-              target={href.startsWith('/') ? undefined : '_blank'}
-              rel={href.startsWith('/') ? undefined : 'noopener'}
+              href={link.href}
+              target={link.href.startsWith('/') ? undefined : '_blank'}
+              rel={link.href.startsWith('/') ? undefined : 'noopener'}
             >
-              <img src={src} width="88" height="31" alt="" loading="lazy" decoding="async" />
+              <img src={src} width="88" height="31" alt={link.label} loading="lazy" decoding="async" />
             </a>
           ) : (
             <img src={src} width="88" height="31" alt="" loading="lazy" decoding="async" />
