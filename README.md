@@ -12,7 +12,7 @@
   <a href="https://pages.github.com"><img src="https://img.shields.io/badge/hosted%20on-GitHub%20Pages-222?logo=github" alt="hosted on GitHub Pages"></a>
 </p>
 
-My personal website, a GeoCities-era homage with a modern build underneath. Written in [Astro](https://astro.build), every page is a plain static file. The visitor counter, contribution graph, changelog and status note are fetched at build time and refreshed in the browser.
+My personal website, a GeoCities-era homage with a modern build underneath. Written in [Astro](https://astro.build), every page is a plain static file. The visitor counter, contribution graph, status note and guestbook are fetched at build time and refreshed in the browser, and the changelog comes from the git log. The guestbook goes through a small Cloudflare Worker in [`worker/`](worker/guestbook.js) that turns the atabook page into JSON.
 
 ## Development
 
