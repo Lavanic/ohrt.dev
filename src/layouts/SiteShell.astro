@@ -67,7 +67,8 @@ try {
 } catch (err) {
   console.warn(`[lastfm] ${err}, hiding now playing until the browser loads it`);
 }
-const trackHeading = tracks[0] && heading(tracks[0]);
+const playedAt = tracks[0]?.playing ? Date.now() : (tracks[0]?.at ?? null);
+const trackHeading = tracks[0] && heading({ playing: false, at: playedAt }, Infinity);
 
 const REPO = 'https://github.com/Lavanic/ohrt.dev';
 let commits: { hash: string; date: string; subject: string }[] = [];
@@ -351,7 +352,7 @@ try {
             ),
           )}
         </div>
-        <section class:list={['playing no-mobile', { 'is-live': trackHeading?.live }]} hidden={tracks.length === 0}>
+        <section class="playing no-mobile" data-at={playedAt ?? undefined} hidden={tracks.length === 0}>
           <h3 class="playing-title">
             <span class="playing-label">{trackHeading?.label}</span>
             <small class="playing-state">{trackHeading?.state}</small>
@@ -440,14 +441,18 @@ try {
         let tracks: Track[] = [];
         let tracksAt = 0;
 
+        const paintHeading = (box: HTMLElement, track: Pick<Track, 'playing' | 'at'>) => {
+          const { live, label, state } = heading(track);
+          box.classList.toggle('is-live', live);
+          box.querySelector('.playing-label')!.textContent = label;
+          box.querySelector('.playing-state')!.textContent = state;
+        };
+
         const paintTracks = () => {
           const box = document.querySelector<HTMLElement>('.playing');
           const template = box?.querySelector<HTMLTemplateElement>('.playing-template');
           if (!box || !template || tracks.length === 0) return;
-          const { live, label, state } = heading(tracks[0]);
-          box.classList.toggle('is-live', live);
-          box.querySelector('.playing-label')!.textContent = label;
-          box.querySelector('.playing-state')!.textContent = state;
+          paintHeading(box, tracks[0]);
           box.querySelector('.playing-list')!.replaceChildren(
             ...tracks.map((t) => {
               const li = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
@@ -471,7 +476,10 @@ try {
 
         document.addEventListener('astro:after-swap', paintTracks);
         document.addEventListener('astro:page-load', () => {
-          if (!document.querySelector('.playing') || Date.now() - tracksAt < 60000) return;
+          const box = document.querySelector<HTMLElement>('.playing');
+          if (!box) return;
+          if (tracks.length === 0 && box.dataset.at) paintHeading(box, { playing: false, at: Number(box.dataset.at) });
+          if (Date.now() - tracksAt < 60000) return;
           fetchTracks()
             .then((latest) => {
               tracks = latest;

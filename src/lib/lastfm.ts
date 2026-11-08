@@ -63,7 +63,7 @@ export async function fetchTracks(): Promise<Track[]> {
 const LIVE_FOR = 15 * 60 * 1000;
 const DAY = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'America/Chicago' });
 
-export function heading(track: Track, now = Date.now()) {
+export function heading(track: Pick<Track, 'playing' | 'at'>, now = Date.now()) {
   const live = track.playing || (track.at !== null && now - track.at <= LIVE_FOR);
   if (live) return { live, label: 'Now Playing', state: '▶ live' };
   return { live, label: 'Recently Played', state: track.at === null ? '' : DAY.format(track.at) };
