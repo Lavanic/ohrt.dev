@@ -141,6 +141,7 @@ try {
 
   .guestbook-top {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
@@ -149,11 +150,14 @@ try {
 
   .guestbook-count {
     margin: 0;
+    white-space: nowrap;
   }
 
   .guestbook-sign {
     display: inline-flex;
     align-items: center;
+    margin-left: auto;
+    white-space: nowrap;
     height: 36px;
     padding: 0 16px;
     border-radius: 4px;
