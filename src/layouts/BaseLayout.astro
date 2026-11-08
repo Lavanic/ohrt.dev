@@ -30,6 +30,12 @@ const ogImage = new URL('/images/og.jpg', Astro.site);
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Oliver Ohrt's Weblog"
+      href="https://blog.ohrt.dev/rss.xml"
+    />
     <meta property="og:site_name" content="ohrt.dev" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
