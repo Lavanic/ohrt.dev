@@ -544,7 +544,32 @@ try {
             {visits !== null && toDigits(visits).map((digit) => <span>{digit}</span>)}
           </div>
         </section>
+        <p class="load-time" hidden></p>
       </aside>
+      <script>
+        // Real time from the request to everything on the page finishing,
+        // from the browser's own timing. Page swaps are timed from the click.
+        const line = document.querySelector<HTMLElement>('.load-time');
+        const show = (ms: number) => {
+          if (!line || !(ms > 0)) return;
+          line.textContent = `this page loaded for you in ${Math.round(ms)} ms`;
+          line.hidden = false;
+        };
+        const firstLoad = () => {
+          const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+          if (nav) show(nav.loadEventEnd - nav.startTime);
+        };
+        if (document.readyState === 'complete') setTimeout(firstLoad);
+        else addEventListener('load', () => setTimeout(firstLoad), { once: true });
+
+        let swapStart = 0;
+        document.addEventListener('astro:before-preparation', () => (swapStart = performance.now()));
+        document.addEventListener('astro:page-load', () => {
+          if (!swapStart) return;
+          show(performance.now() - swapStart);
+          swapStart = 0;
+        });
+      </script>
       <script>
         import { fetchDays, toCells } from '../lib/contributions';
         import { fetchVisits, toDigits } from '../lib/goatcounter';
@@ -1015,7 +1040,24 @@ try {
     padding: 30px;
   }
   .panel-right {
+    position: relative;
     flex: 0 0 20%;
+  }
+
+  .load-time {
+    position: absolute;
+    right: 10px;
+    bottom: 9px;
+    left: 20px;
+    margin: 0;
+    color: #fff;
+    font-size: 11px;
+    text-align: left;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  }
+
+  .load-time[hidden] {
+    display: none;
   }
 
   .gh-chart {
