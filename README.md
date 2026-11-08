@@ -1,7 +1,7 @@
 # ohrt.dev
 
 <p align="center">
-  <a href="https://ohrt.dev"><img src=".github/screenshots.webp" width="428" alt="ohrt.dev on a desktop browser and on a phone"></a>
+  <a href="https://ohrt.dev"><img src=".github/screenshots.webp" width="571" alt="ohrt.dev on a desktop browser and on a phone"></a>
 </p>
 
 <p align="center">
