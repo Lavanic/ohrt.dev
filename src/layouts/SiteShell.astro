@@ -725,7 +725,7 @@ try {
 
   .logo-wrap {
     position: absolute;
-    left: -81px;
+    left: max(-81px, calc((12px - 50vw) / var(--scale) + var(--container-width) * (0.5 + 0.172)));
     top: 5px;
     z-index: 999;
     cursor: pointer;
