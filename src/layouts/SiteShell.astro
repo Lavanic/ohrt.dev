@@ -9,6 +9,7 @@ import BaseLayout from './BaseLayout.astro';
 import { WEEKS, fetchDays, toCells, type Cell } from '../lib/contributions';
 import { fetchVisits, toDigits } from '../lib/goatcounter';
 import { faceSrc, fetchStatus, STATUS_URL, STATUS_VIA, timeAgo, type Status } from '../lib/status';
+import { fetchTrackOnce, type Track } from '../lib/lastfm';
 
 interface Props {
   title?: string;
@@ -58,6 +59,13 @@ try {
 }
 
 const statusFace = status && faceSrc(status.face);
+
+let track: Track | null = null;
+try {
+  track = await fetchTrackOnce();
+} catch (err) {
+  console.warn(`[lastfm] ${err}, hiding now playing until the browser loads it`);
+}
 
 const REPO = 'https://github.com/Lavanic/ohrt.dev';
 let commits: { hash: string; date: string; subject: string }[] = [];
@@ -339,6 +347,22 @@ try {
             ),
           )}
         </div>
+        <section class="playing no-mobile" hidden={track === null}>
+          <h3 class="playing-title">
+            Now Playing <small class="playing-state">{track?.playing ? '▶ live' : 'last played'}</small>
+          </h3>
+          <a class="playing-row" href={track?.url} target="_blank" rel="noopener">
+            {track?.art ? (
+              <img class="playing-art" src={track.art} width="64" height="64" alt="" decoding="async" />
+            ) : (
+              <span class="playing-art" />
+            )}
+            <span class="playing-text">
+              <span class="playing-song">{track?.title}</span>
+              <span class="playing-artist">{track?.artist}</span>
+            </span>
+          </a>
+        </section>
         <p class="desk-note">
           <i>psst!</i> I look better on ur laptop btw
         </p>
@@ -366,7 +390,7 @@ try {
         // thing I scrobbled. The name baked into the HTML stands on its own,
         // so no key, no JS or a bad response all just leave the paragraph
         // as written.
-        import { fetchArtist, type Artist } from '../lib/lastfm';
+        import { fetchArtist, fetchTrack, type Artist, type Track } from '../lib/lastfm';
 
         let artist: Artist | null = null;
 
@@ -378,6 +402,40 @@ try {
         };
 
         document.addEventListener('astro:after-swap', paint);
+
+        let track: Track | null = null;
+        let trackAt = 0;
+
+        const paintTrack = () => {
+          const box = document.querySelector<HTMLElement>('.playing');
+          if (!box || !track) return;
+          box.querySelector('.playing-state')!.textContent = track.playing ? '▶ live' : 'last played';
+          box.querySelector<HTMLAnchorElement>('.playing-row')!.href = track.url;
+          box.querySelector('.playing-song')!.textContent = track.title;
+          box.querySelector('.playing-artist')!.textContent = track.artist;
+          const art = box.querySelector('.playing-art')!;
+          if (track.art && art.getAttribute('src') !== track.art) {
+            const img = new Image(64, 64);
+            for (const { name, value } of art.attributes) img.setAttribute(name, value);
+            img.src = track.art;
+            img.alt = '';
+            img.decoding = 'async';
+            art.replaceWith(img);
+          }
+          box.hidden = false;
+        };
+
+        document.addEventListener('astro:after-swap', paintTrack);
+        document.addEventListener('astro:page-load', () => {
+          if (!document.querySelector('.playing') || Date.now() - trackAt < 60000) return;
+          fetchTrack()
+            .then((latest) => {
+              track = latest;
+              trackAt = Date.now();
+              paintTrack();
+            })
+            .catch(() => {});
+        });
         document.addEventListener('astro:page-load', () => {
           if (!document.querySelector('.lastfm-artist')) return;
           fetchArtist()
@@ -968,6 +1026,67 @@ try {
     display: none;
   }
 
+  .playing {
+    margin-top: 14px;
+  }
+
+  .playing[hidden] {
+    display: none;
+  }
+
+  .playing-state {
+    font-size: 11px;
+    letter-spacing: 0;
+    opacity: 0.9;
+  }
+
+  .playing-row {
+    contain: inline-size;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .playing-row:hover .playing-song {
+    text-decoration: underline;
+  }
+
+  .playing-art {
+    display: block;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    box-sizing: border-box;
+    border: 1px solid #cfe6ff;
+    background: #263e66;
+  }
+
+  .playing-text {
+    min-width: 0;
+    line-height: 1.3;
+  }
+
+  .playing-song,
+  .playing-artist {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .playing-song {
+    font-size: 13px;
+    font-weight: bold;
+  }
+
+  .playing-artist {
+    color: #cfe6ff;
+    font-size: 12px;
+  }
+
   .status {
     position: relative;
     display: grid;
@@ -1033,7 +1152,8 @@ try {
   }
 
   .changelog,
-  .counter {
+  .counter,
+  .playing {
     margin: 8px 10px 16px;
     border-radius: 6px;
     overflow: hidden;
@@ -1044,7 +1164,8 @@ try {
   }
 
   .changelog-title,
-  .counter-title {
+  .counter-title,
+  .playing-title {
     display: flex;
     justify-content: space-between;
     align-items: center;

@@ -19,3 +19,25 @@ export async function fetchArtist(): Promise<Artist | null> {
     title: track.name ? `${playing ? 'Playing' : 'Last played'}: ${track.name}` : undefined,
   };
 }
+
+const PLACEHOLDER = '2a96cbd8b46e442fc41c2b86b821562f';
+
+export type Track = { title: string; artist: string; art: string | null; url: string; playing: boolean };
+
+export async function fetchTrack(): Promise<Track> {
+  const res = await fetch(LASTFM_URL, { signal: AbortSignal.timeout(5000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const t = (await res.json())?.recenttracks?.track?.[0];
+  if (!t?.name) throw new Error('no tracks');
+  const art: string = t.image?.find((i: { size: string }) => i.size === 'medium')?.['#text'] ?? '';
+  return {
+    title: t.name,
+    artist: t.artist['#text'],
+    art: art && !art.includes(PLACEHOLDER) ? art : null,
+    url: t.url,
+    playing: t['@attr']?.nowplaying === 'true',
+  };
+}
+
+let pending: Promise<Track> | undefined;
+export const fetchTrackOnce = () => (pending ??= fetchTrack());
