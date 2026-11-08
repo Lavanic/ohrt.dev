@@ -57,7 +57,37 @@ const ogImage = new URL('/images/og.jpg', Astro.site);
         src: url('/fonts/DSEG7Classic-Bold.woff2') format('woff2');
         font-display: block;
       }
+      @font-face {
+        font-family: 'Noto Sans';
+        src: url('/fonts/NotoSans-Regular.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Noto Sans';
+        src: url('/fonts/NotoSans-Bold.woff2') format('woff2');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Noto Sans';
+        src: url('/fonts/NotoSans-Italic.woff2') format('woff2');
+        font-weight: 400;
+        font-style: italic;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Noto Sans';
+        src: url('/fonts/NotoSans-BoldItalic.woff2') format('woff2');
+        font-weight: 700;
+        font-style: italic;
+        font-display: swap;
+      }
     </style>
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/NotoSans-Regular.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/NotoSans-Bold.woff2" crossorigin />
     <link
       rel="preload"
       as="font"
@@ -118,7 +148,7 @@ const ogImage = new URL('/images/og.jpg', Astro.site);
     justify-content: center;
     padding: 20px;
     background-color: #202e46;
-    font-family: 'MS UI Gothic', 'MS PGothic', sans-serif;
+    font-family: 'Noto Sans', sans-serif;
   }
 
   body::before {
