@@ -1,6 +1,6 @@
 ---
 import SiteShell from '../layouts/SiteShell.astro';
-import { fetchMessages, GUESTBOOK_URL, when, type Message } from '../lib/guestbook';
+import { fetchMessages, GUESTBOOK_URL, keyOf, when, type Message } from '../lib/guestbook';
 
 let messages: Message[] = [];
 let failed = false;
@@ -24,7 +24,7 @@ try {
         Sign the guestbook
       </a>
     </div>
-    <ol class="messages">
+    <ol class="messages" data-key={keyOf(messages)}>
       {messages.map((m) => (
         <li class="message">
           <div class="message-head">
@@ -44,14 +44,32 @@ try {
         </li>
       ))}
     </ol>
+    <template id="gb-message">
+      <li class="message">
+        <div class="message-head">
+          <strong></strong>
+          <time></time>
+        </div>
+        <p class="message-text"></p>
+      </li>
+    </template>
+    <template id="gb-reply">
+      <div class="reply">
+        <div class="message-head">
+          <strong>Oliver replied</strong>
+          <time></time>
+        </div>
+        <p class="message-text"></p>
+      </div>
+    </template>
     <p class="guestbook-credit">
       {failed && (
-        <>
+        <span class="guestbook-fallback">
           <a href={GUESTBOOK_URL} target="_blank" rel="noopener">
             read them on atabook
           </a>
           ,{' '}
-        </>
+        </span>
       )}
       powered by{' '}
       <a href="https://atabook.org" target="_blank" rel="noopener">
@@ -60,6 +78,49 @@ try {
     </p>
   </div>
 </SiteShell>
+
+<script>
+  import { fetchMessages, keyOf, when, type Message } from '../lib/guestbook';
+
+  const stamp = (el: Element, time: number, html: string) => {
+    const t = el.querySelector('time')!;
+    t.dateTime = new Date(time).toISOString();
+    t.textContent = when(time);
+    el.querySelector('.message-text')!.innerHTML = html;
+  };
+
+  const render = (list: HTMLElement, messages: Message[]) => {
+    const message = document.querySelector<HTMLTemplateElement>('#gb-message')!.content.firstElementChild!;
+    const reply = document.querySelector<HTMLTemplateElement>('#gb-reply')!.content.firstElementChild!;
+    list.replaceChildren(
+      ...messages.map((m) => {
+        const li = message.cloneNode(true) as HTMLElement;
+        li.querySelector('strong')!.innerHTML = m.name;
+        stamp(li, m.time, m.html);
+        for (const r of m.replies) {
+          const box = reply.cloneNode(true) as HTMLElement;
+          stamp(box, r.time, r.html);
+          li.append(box);
+        }
+        return li;
+      }),
+    );
+    list.dataset.key = keyOf(messages);
+    document.querySelector('.guestbook-count')!.textContent =
+      `${messages.length} ${messages.length === 1 ? 'message' : 'messages'}`;
+    document.querySelector('.guestbook-fallback')?.remove();
+  };
+
+  document.addEventListener('astro:page-load', () => {
+    const list = document.querySelector<HTMLElement>('.guestbook .messages');
+    if (!list) return;
+    fetchMessages()
+      .then((messages) => {
+        if (keyOf(messages) !== list.dataset.key) render(list, messages);
+      })
+      .catch(() => {});
+  });
+</script>
 
 <style>
   :global(main.panel-center > .panel-content) {
