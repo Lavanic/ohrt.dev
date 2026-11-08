@@ -20,7 +20,7 @@ const ELSEWHERE = [
       <ul class="elsewhere">
         {ELSEWHERE.map(({ name, href, icon }) => (
           <li>
-            <a href={href} target={href.startsWith('mailto:') ? undefined : '_blank'} rel="noopener" title={name}>
+            <a href={href} target={href.startsWith('mailto:') ? undefined : '_blank'} rel="me noopener" title={name}>
               <img src={`/icons/social/${icon}@48.png`} width="48" height="48" alt={name} />
             </a>
           </li>

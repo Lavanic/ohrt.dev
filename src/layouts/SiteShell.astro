@@ -94,15 +94,17 @@ try {
 <BaseLayout title={title} description={description}>
   <div class="layout">
     <div class="box header" transition:persist="header" transition:animate="none">
-      <h1 class="logo-wrap" aria-label="ohrt.dev, with spinning gears in place of the two O's">
+      <h1 class="logo-wrap h-card" aria-label="Oliver Ohrt">
         <img
-          class="logo-fallback"
+          class="logo-fallback p-name"
           src="/images/logo_fallback.png"
           width="740"
           height="258"
           draggable="false"
-          alt="ohrt.dev, with gears in place of the two O's"
+          alt="Oliver Ohrt"
         />
+        <data class="u-url u-uid" value="https://ohrt.dev/"></data>
+        <data class="u-photo" value="https://ohrt.dev/images/webmaster.webp"></data>
         <span class="logo-composite">
           <canvas class="gears" width="154" height="258" aria-hidden="true"></canvas>
           <img src="/images/static.png" width="588" height="258" alt="" draggable="false" />
