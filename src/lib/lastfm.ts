@@ -65,8 +65,8 @@ const DAY = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', t
 
 export function heading(track: Track, now = Date.now()) {
   const live = track.playing || (track.at !== null && now - track.at <= LIVE_FOR);
-  if (live) return { label: 'Now Playing', state: '▶ live' };
-  return { label: 'Recently Played', state: track.at === null ? '' : DAY.format(track.at) };
+  if (live) return { live, label: 'Now Playing', state: '▶ live' };
+  return { live, label: 'Recently Played', state: track.at === null ? '' : DAY.format(track.at) };
 }
 
 let pending: Promise<Track[]> | undefined;
