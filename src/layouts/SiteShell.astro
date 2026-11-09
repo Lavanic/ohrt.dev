@@ -94,281 +94,300 @@ try {
 
 <BaseLayout title={title} description={description}>
   <div class="layout">
-    <div class="box header" transition:persist="header" transition:animate="none">
-      <h1 class="logo-wrap h-card" aria-label="Oliver Ohrt">
-        <img
-          class="logo-fallback p-name"
-          src="/images/logo_fallback.png"
-          width="740"
-          height="258"
-          draggable="false"
-          alt="Oliver Ohrt"
-        />
-        <data class="u-url u-uid" value="https://ohrt.dev/"></data>
-        <data class="u-photo" value="https://ohrt.dev/images/webmaster.webp"></data>
-        <span class="logo-composite">
-          <canvas class="gears" width="154" height="258" aria-hidden="true"></canvas>
-          <img src="/images/static.png" width="588" height="258" alt="" draggable="false" />
-          <input class="haptic-tick" type="checkbox" switch tabindex="-1" aria-hidden="true" />
-        </span>
-      </h1>
-      <script>
-        // Gear spin easter egg. Tapping the logo kicks the
-        // velocity up (it stacks) and then decays to resting speed.
-        const wrap = document.querySelector<HTMLElement>('.logo-wrap');
-        const canvas = wrap?.querySelector<HTMLCanvasElement>('canvas.gears');
-        const ctx = canvas?.getContext('2d');
+    <div class="fold">
+      <div class="box header" transition:persist="header" transition:animate="none">
+        <h1 class="logo-wrap h-card" aria-label="Oliver Ohrt">
+          <img
+            class="logo-fallback p-name"
+            src="/images/logo_fallback.png"
+            width="740"
+            height="258"
+            draggable="false"
+            alt="Oliver Ohrt"
+          />
+          <data class="u-url u-uid" value="https://ohrt.dev/"></data>
+          <data class="u-photo" value="https://ohrt.dev/images/webmaster.webp"></data>
+          <span class="logo-composite">
+            <canvas class="gears" width="154" height="258" aria-hidden="true"></canvas>
+            <img src="/images/static.png" width="588" height="258" alt="" draggable="false" />
+            <input class="haptic-tick" type="checkbox" switch tabindex="-1" aria-hidden="true" />
+          </span>
+        </h1>
+        <script>
+          // Gear spin easter egg. Tapping the logo kicks the
+          // velocity up (it stacks) and then decays to resting speed.
+          const wrap = document.querySelector<HTMLElement>('.logo-wrap');
+          const canvas = wrap?.querySelector<HTMLCanvasElement>('canvas.gears');
+          const ctx = canvas?.getContext('2d');
 
-        if (wrap && canvas && ctx) {
-          const COLS = 10;
-          const FRAMES = 15;
-          const FW = 154;
-          const FH = 258;
-          const BASE = 1000 / 30; // frames/sec, the webp ran one frame per 30ms
-          const KICK = 120;
-          const MAX = BASE * 15;
-          const TAU = 1.3; // seconds for a kick to fade
-          const SHUTTER = 0.9; // how much of the swept arc to smear, 0 disables
-          const BLEND_MAX = 6;
+          if (wrap && canvas && ctx) {
+            const COLS = 10;
+            const FRAMES = 15;
+            const FW = 154;
+            const FH = 258;
+            const BASE = 1000 / 30; // frames/sec, the webp ran one frame per 30ms
+            const KICK = 120;
+            const MAX = BASE * 15;
+            const TAU = 1.3; // seconds for a kick to fade
+            const SHUTTER = 0.9; // how much of the swept arc to smear, 0 disables
+            const BLEND_MAX = 6;
 
-          const sheet = new Image();
-          sheet.src = '/images/gears_sheet.webp';
+            const sheet = new Image();
+            sheet.src = '/images/gears_sheet.webp';
 
-          let pos = 0;
-          let vel = BASE;
-          let last = 0;
-          let drawn = -1;
-          let blended = 0;
-          let raf = 0;
+            let pos = 0;
+            let vel = BASE;
+            let last = 0;
+            let drawn = -1;
+            let blended = 0;
+            let raf = 0;
+            const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+            const blit = (f: number) => {
+              ctx.drawImage(sheet, (f % COLS) * FW, ((f / COLS) | 0) * FH, FW, FH, 0, 0, FW, FH);
+            };
+
+            const step = (now: number) => {
+              // Clamp dt so returning from a background tab doesn't fast-forward
+              const dt = Math.min((now - last) / 1000, 0.064);
+              last = now;
+              const advance = vel * dt;
+              pos = (pos + advance) % FRAMES;
+              vel = BASE + (vel - BASE) * Math.exp(-dt / TAU);
+              const f = pos | 0;
+              // Motion blur by averaging the frames the gears swept through
+              // since the last repaint, the same thing a camera shutter does
+              const n = Math.max(1, Math.min(BLEND_MAX, Math.round(advance * SHUTTER)));
+              if (f !== drawn || n !== blended) {
+                drawn = f;
+                blended = n;
+                ctx.clearRect(0, 0, FW, FH);
+                blit(f);
+                for (let k = 1; k < n; k++) {
+                  ctx.globalAlpha = 1 / (k + 1);
+                  blit((f - k + FRAMES) % FRAMES);
+                }
+                ctx.globalAlpha = 1;
+              }
+              raf = requestAnimationFrame(step);
+            };
+
+            const fallback = wrap.querySelector<HTMLElement>('.logo-fallback')!;
+            const composite = wrap.querySelector<HTMLElement>('.logo-composite')!;
+
+            const start = () => {
+              if (raf || reduced.matches) return;
+              fallback.style.display = 'none';
+              composite.style.opacity = '1';
+              last = performance.now();
+              raf = requestAnimationFrame(step);
+            };
+
+            const stop = () => {
+              cancelAnimationFrame(raf);
+              raf = 0;
+              composite.style.opacity = '';
+              fallback.style.display = '';
+            };
+
+            sheet
+              .decode()
+              .then(start)
+              .catch(() => {}); // decode failed, the fallback logo stays up
+            reduced.addEventListener('change', () => (reduced.matches ? stop() : start()));
+
+            // iOS plays its own tick because the finger lands on the real switch
+            // overlaying the logo. Android has no such tick, so ask for one.
+            wrap.addEventListener('pointerdown', (e) => {
+              if (e.pointerType === 'mouse') return;
+              vel = Math.min(vel + KICK, MAX);
+              navigator.vibrate?.(15);
+            });
+          }
+        </script>
+      </div>
+
+      <div class="box subheader" transition:persist="welcome-bar" transition:animate="none">
+        <div class="welcome-scroll">
+          <span>Welcome to my site!</span>
+        </div>
+        <script>
+          const scroll = () => document.querySelector('.welcome-scroll span')?.getAnimations()[0];
+          let start: CSSNumberish | null = null;
+          document.addEventListener('astro:before-swap', () => {
+            start = scroll()?.startTime ?? null;
+          });
+          document.addEventListener('astro:after-swap', () => {
+            const anim = scroll();
+            if (anim && start !== null) anim.startTime = start;
+          });
+        </script>
+      </div>
+      <div class="box subheader stamps" transition:persist="stamp-bar" transition:animate="none">
+        <div class="marquee" role="img" aria-label="Stamp collection">
+          <div class="marquee__inner">
+            {paddedStamps.map((src) => (
+              <img src={src} alt="" fetchpriority="low" decoding="async" />
+            ))}
+          </div>
+          <div class="marquee__inner" aria-hidden="true">
+            {paddedStamps.map((src) => (
+              <img src={src} alt="" fetchpriority="low" decoding="async" />
+            ))}
+          </div>
+        </div>
+        <noscript>
+          <style is:inline>
+            /* The is-ready class never arrives without JS, so force the marquee visible */
+            .marquee .marquee__inner {
+              opacity: 1 !important;
+              animation-play-state: running !important;
+            }
+            @media (prefers-reduced-motion: reduce) {
+              .marquee .marquee__inner {
+                animation-play-state: paused !important;
+              }
+            }
+          </style>
+        </noscript>
+        <script>
+          const marquee = document.querySelector('.marquee') as HTMLElement | null;
+          const inners = marquee ? Array.from(marquee.querySelectorAll<HTMLElement>('.marquee__inner')) : [];
           const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-          const blit = (f: number) => {
-            ctx.drawImage(sheet, (f % COLS) * FW, ((f / COLS) | 0) * FH, FW, FH, 0, 0, FW, FH);
-          };
+          if (marquee && inners.length) {
+            // The CSS animation runs on the compositor thread, so the browser's
+            // main thread keeps a stale idea of which stamps are on screen and
+            // pauses their gif playback as "offscreen". Driving the transform
+            // from rAF keeps the visibility bookkeeping fresh every frame.
+            const GAP = 4;
+            const DURATION = 35; // seconds per loop, same speed as the CSS animation
+            let x = 0;
+            let width = 0;
+            let last = 0;
+            let raf = 0;
 
-          const step = (now: number) => {
-            // Clamp dt so returning from a background tab doesn't fast-forward
-            const dt = Math.min((now - last) / 1000, 0.064);
-            last = now;
-            const advance = vel * dt;
-            pos = (pos + advance) % FRAMES;
-            vel = BASE + (vel - BASE) * Math.exp(-dt / TAU);
-            const f = pos | 0;
-            // Motion blur by averaging the frames the gears swept through
-            // since the last repaint, the same thing a camera shutter does
-            const n = Math.max(1, Math.min(BLEND_MAX, Math.round(advance * SHUTTER)));
-            if (f !== drawn || n !== blended) {
-              drawn = f;
-              blended = n;
-              ctx.clearRect(0, 0, FW, FH);
-              blit(f);
-              for (let k = 1; k < n; k++) {
-                ctx.globalAlpha = 1 / (k + 1);
-                blit((f - k + FRAMES) % FRAMES);
+            // offsetWidth is layout width, unaffected by the mobile scale transform
+            const measure = () => {
+              width = inners[0].offsetWidth + GAP;
+            };
+
+            const step = (now: number) => {
+              // Clamp dt so returning from a background tab does not jump the bar
+              const dt = Math.min((now - last) / 1000, 0.064);
+              last = now;
+              x = (x - (width / DURATION) * dt) % width;
+              for (const inner of inners) inner.style.transform = `translate3d(${x}px, 0, 0)`;
+              raf = requestAnimationFrame(step);
+            };
+
+            const start = () => {
+              if (raf || reduced.matches || !marquee.classList.contains('is-ready')) return;
+              marquee.classList.add('js-drive');
+              measure();
+              last = performance.now();
+              raf = requestAnimationFrame(step);
+            };
+
+            const stop = () => {
+              cancelAnimationFrame(raf);
+              raf = 0;
+              marquee.classList.remove('js-drive');
+              for (const inner of inners) inner.style.transform = '';
+            };
+
+            window.addEventListener('resize', () => {
+              if (raf) measure();
+            });
+            reduced.addEventListener('change', () => (reduced.matches ? stop() : start()));
+
+            // Fade the bar in once every stamp has loaded or failed, then start
+            const imgs = marquee.querySelectorAll('img');
+            let loaded = 0;
+            const check = () => {
+              if (++loaded >= imgs.length) {
+                marquee.classList.add('is-ready');
+                start();
               }
-              ctx.globalAlpha = 1;
-            }
-            raf = requestAnimationFrame(step);
-          };
-
-          const fallback = wrap.querySelector<HTMLElement>('.logo-fallback')!;
-          const composite = wrap.querySelector<HTMLElement>('.logo-composite')!;
-
-          const start = () => {
-            if (raf || reduced.matches) return;
-            fallback.style.display = 'none';
-            composite.style.opacity = '1';
-            last = performance.now();
-            raf = requestAnimationFrame(step);
-          };
-
-          const stop = () => {
-            cancelAnimationFrame(raf);
-            raf = 0;
-            composite.style.opacity = '';
-            fallback.style.display = '';
-          };
-
-          sheet
-            .decode()
-            .then(start)
-            .catch(() => {}); // decode failed, the fallback logo stays up
-          reduced.addEventListener('change', () => (reduced.matches ? stop() : start()));
-
-          // iOS plays its own tick because the finger lands on the real switch
-          // overlaying the logo. Android has no such tick, so ask for one.
-          wrap.addEventListener('pointerdown', (e) => {
-            if (e.pointerType === 'mouse') return;
-            vel = Math.min(vel + KICK, MAX);
-            navigator.vibrate?.(15);
-          });
-        }
-      </script>
-    </div>
-
-    <div class="box subheader" transition:persist="welcome-bar" transition:animate="none">
-      <div class="welcome-scroll">
-        <span>Welcome to my site!</span>
-      </div>
-      <script>
-        const scroll = () => document.querySelector('.welcome-scroll span')?.getAnimations()[0];
-        let start: CSSNumberish | null = null;
-        document.addEventListener('astro:before-swap', () => {
-          start = scroll()?.startTime ?? null;
-        });
-        document.addEventListener('astro:after-swap', () => {
-          const anim = scroll();
-          if (anim && start !== null) anim.startTime = start;
-        });
-      </script>
-    </div>
-    <div class="box subheader stamps" transition:persist="stamp-bar" transition:animate="none">
-      <div class="marquee" role="img" aria-label="Stamp collection">
-        <div class="marquee__inner">
-          {paddedStamps.map((src) => (
-            <img src={src} alt="" fetchpriority="low" decoding="async" />
-          ))}
-        </div>
-        <div class="marquee__inner" aria-hidden="true">
-          {paddedStamps.map((src) => (
-            <img src={src} alt="" fetchpriority="low" decoding="async" />
-          ))}
-        </div>
-      </div>
-      <noscript>
-        <style is:inline>
-          /* The is-ready class never arrives without JS, so force the marquee visible */
-          .marquee .marquee__inner {
-            opacity: 1 !important;
-            animation-play-state: running !important;
+            };
+            imgs.forEach((img) => (img.complete ? check() : (img.onload = img.onerror = check)));
           }
-          @media (prefers-reduced-motion: reduce) {
-            .marquee .marquee__inner {
-              animation-play-state: paused !important;
-            }
-          }
-        </style>
-      </noscript>
-      <script>
-        const marquee = document.querySelector('.marquee') as HTMLElement | null;
-        const inners = marquee ? Array.from(marquee.querySelectorAll<HTMLElement>('.marquee__inner')) : [];
-        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+        </script>
+      </div>
 
-        if (marquee && inners.length) {
-          // The CSS animation runs on the compositor thread, so the browser's
-          // main thread keeps a stale idea of which stamps are on screen and
-          // pauses their gif playback as "offscreen". Driving the transform
-          // from rAF keeps the visibility bookkeeping fresh every frame.
-          const GAP = 4;
-          const DURATION = 35; // seconds per loop, same speed as the CSS animation
-          let x = 0;
-          let width = 0;
-          let last = 0;
-          let raf = 0;
-
-          // offsetWidth is layout width, unaffected by the mobile scale transform
-          const measure = () => {
-            width = inners[0].offsetWidth + GAP;
-          };
-
-          const step = (now: number) => {
-            // Clamp dt so returning from a background tab does not jump the bar
-            const dt = Math.min((now - last) / 1000, 0.064);
-            last = now;
-            x = (x - (width / DURATION) * dt) % width;
-            for (const inner of inners) inner.style.transform = `translate3d(${x}px, 0, 0)`;
-            raf = requestAnimationFrame(step);
-          };
-
-          const start = () => {
-            if (raf || reduced.matches || !marquee.classList.contains('is-ready')) return;
-            marquee.classList.add('js-drive');
-            measure();
-            last = performance.now();
-            raf = requestAnimationFrame(step);
-          };
-
-          const stop = () => {
-            cancelAnimationFrame(raf);
-            raf = 0;
-            marquee.classList.remove('js-drive');
-            for (const inner of inners) inner.style.transform = '';
-          };
-
-          window.addEventListener('resize', () => {
-            if (raf) measure();
-          });
-          reduced.addEventListener('change', () => (reduced.matches ? stop() : start()));
-
-          // Fade the bar in once every stamp has loaded or failed, then start
-          const imgs = marquee.querySelectorAll('img');
-          let loaded = 0;
-          const check = () => {
-            if (++loaded >= imgs.length) {
-              marquee.classList.add('is-ready');
-              start();
-            }
-          };
-          imgs.forEach((img) => (img.complete ? check() : (img.onload = img.onerror = check)));
-        }
-      </script>
-    </div>
-
-    <div class="row main-row">
-      <nav class="box panel panel-left">
-        <div class="panel-nav nav-navigate">
-          <span class="visually-hidden">Navigate</span>
-        </div>
-        <div class="nav">
-          {NAVIGATE.map(({ name, href, construction }) =>
-            href ? (
-              <a
-                class:list={['nav-btn', { 'nav-warn': construction }]}
-                href={href}
-                target={href.startsWith('http') ? '_blank' : undefined}
-                rel={href.startsWith('http') ? 'noopener' : undefined}
-              >
-                {name}
-              </a>
-            ) : (
-              <div class:list={['nav-btn', { 'nav-warn': construction }]}>{name}</div>
-            ),
-          )}
-          <div class="panel-nav nav-offsite">
-            <span class="visually-hidden">Offsite</span>
+      <div class="row main-row">
+        <nav class="box panel panel-left">
+          <div class="panel-nav nav-navigate">
+            <span class="visually-hidden">Navigate</span>
           </div>
-          {OFFSITE.map(({ name, href, construction }) =>
-            href ? (
-              <a
-                class:list={['nav-btn', { 'nav-warn': construction }]}
-                href={href}
-                target={href.startsWith('http') ? '_blank' : undefined}
-                rel={href.startsWith('http') ? 'noopener' : undefined}
-              >
-                {name}
-              </a>
-            ) : (
-              <div class:list={['nav-btn', { 'nav-warn': construction }]}>{name}</div>
-            ),
-          )}
-        </div>
-        <section class="playing no-mobile" data-at={playedAt ?? undefined} hidden={tracks.length === 0}>
-          <h2 class="playing-title">
-            <span class="playing-label">{trackHeading?.label}</span>
-            <small class="playing-state">{trackHeading?.state}</small>
-          </h2>
-          <ol class="playing-list">
-            {tracks.map((t) => (
+          <div class="nav">
+            {NAVIGATE.map(({ name, href, construction }) =>
+              href ? (
+                <a
+                  class:list={['nav-btn', { 'nav-warn': construction }]}
+                  href={href}
+                  target={href.startsWith('http') ? '_blank' : undefined}
+                  rel={href.startsWith('http') ? 'noopener' : undefined}
+                >
+                  {name}
+                </a>
+              ) : (
+                <div class:list={['nav-btn', { 'nav-warn': construction }]}>{name}</div>
+              ),
+            )}
+            <div class="panel-nav nav-offsite">
+              <span class="visually-hidden">Offsite</span>
+            </div>
+            {OFFSITE.map(({ name, href, construction }) =>
+              href ? (
+                <a
+                  class:list={['nav-btn', { 'nav-warn': construction }]}
+                  href={href}
+                  target={href.startsWith('http') ? '_blank' : undefined}
+                  rel={href.startsWith('http') ? 'noopener' : undefined}
+                >
+                  {name}
+                </a>
+              ) : (
+                <div class:list={['nav-btn', { 'nav-warn': construction }]}>{name}</div>
+              ),
+            )}
+          </div>
+          <section class="playing no-mobile" data-at={playedAt ?? undefined} hidden={tracks.length === 0}>
+            <h2 class="playing-title">
+              <span class="playing-label">{trackHeading?.label}</span>
+              <small class="playing-state">{trackHeading?.state}</small>
+            </h2>
+            <ol class="playing-list">
+              {tracks.map((t) => (
+                <li>
+                  <a class="playing-row" href={t.url} target="_blank" rel="noopener">
+                    {t.art ? (
+                      <img class="playing-art" src={t.art} width="64" height="64" alt="" decoding="async" />
+                    ) : (
+                      <span class="playing-art" />
+                    )}
+                    <span class="playing-text">
+                      <span class="playing-song">{t.title}</span>
+                      <span class="playing-artist">{t.artist}</span>
+                    </span>
+                    <span class="playing-eq" aria-hidden="true">
+                      <i></i>
+                      <i></i>
+                      <i></i>
+                      <i></i>
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ol>
+            <template class="playing-template">
               <li>
-                <a class="playing-row" href={t.url} target="_blank" rel="noopener">
-                  {t.art ? (
-                    <img class="playing-art" src={t.art} width="64" height="64" alt="" decoding="async" />
-                  ) : (
-                    <span class="playing-art" />
-                  )}
+                <a class="playing-row" target="_blank" rel="noopener">
+                  <span class="playing-art"></span>
                   <span class="playing-text">
-                    <span class="playing-song">{t.title}</span>
-                    <span class="playing-artist">{t.artist}</span>
+                    <span class="playing-song"></span>
+                    <span class="playing-artist"></span>
                   </span>
                   <span class="playing-eq" aria-hidden="true">
                     <i></i>
@@ -378,293 +397,276 @@ try {
                   </span>
                 </a>
               </li>
-            ))}
-          </ol>
-          <template class="playing-template">
-            <li>
-              <a class="playing-row" target="_blank" rel="noopener">
-                <span class="playing-art"></span>
-                <span class="playing-text">
-                  <span class="playing-song"></span>
-                  <span class="playing-artist"></span>
-                </span>
-                <span class="playing-eq" aria-hidden="true">
-                  <i></i>
-                  <i></i>
-                  <i></i>
-                  <i></i>
-                </span>
-              </a>
-            </li>
-          </template>
-        </section>
-        <p class="desk-note">
-          <i>psst!</i> I look better on ur laptop btw
-        </p>
-        <p class="nav-foot">
-          <span>
-            total site visitors: <span class="nav-hits">{visits ?? '...'}</span>
-          </span>
-          {commits[0] && (
-            <span>
-              updated @ {commits[0].date.slice(0, 5)},{' '}
-              <a href={`${REPO}/commit/${commits[0].hash}`} target="_blank" rel="noopener">
-                {commits[0].hash}
-              </a>
-            </span>
-          )}
-        </p>
-      </nav>
-      <main class="box panel panel-center">
-        <div class="panel-content">
-          <slot />
-        </div>
-      </main>
-      <script>
-        import { fetchTracks, heading, type Track } from '../lib/lastfm';
-
-        let tracks: Track[] = [];
-        let tracksAt = 0;
-
-        const paintHeading = (box: HTMLElement, track: Pick<Track, 'playing' | 'at'>) => {
-          const { live, label, state } = heading(track);
-          box.classList.toggle('is-live', live);
-          box.querySelector('.playing-label')!.textContent = label;
-          box.querySelector('.playing-state')!.textContent = state;
-        };
-
-        const paintTracks = () => {
-          const box = document.querySelector<HTMLElement>('.playing');
-          const template = box?.querySelector<HTMLTemplateElement>('.playing-template');
-          if (!box || !template || tracks.length === 0) return;
-          paintHeading(box, tracks[0]);
-          box.querySelector('.playing-list')!.replaceChildren(
-            ...tracks.map((t) => {
-              const li = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
-              li.querySelector<HTMLAnchorElement>('.playing-row')!.href = t.url;
-              li.querySelector('.playing-song')!.textContent = t.title;
-              li.querySelector('.playing-artist')!.textContent = t.artist;
-              if (t.art) {
-                const blank = li.querySelector('.playing-art')!;
-                const img = new Image(64, 64);
-                for (const { name, value } of blank.attributes) img.setAttribute(name, value);
-                img.src = t.art;
-                img.alt = '';
-                img.decoding = 'async';
-                blank.replaceWith(img);
-              }
-              return li;
-            }),
-          );
-          box.hidden = false;
-        };
-
-        document.addEventListener('astro:after-swap', paintTracks);
-        document.addEventListener('astro:page-load', () => {
-          const box = document.querySelector<HTMLElement>('.playing');
-          if (!box) return;
-          if (tracks.length === 0 && box.dataset.at) paintHeading(box, { playing: false, at: Number(box.dataset.at) });
-          if (Date.now() - tracksAt < 60000) return;
-          fetchTracks()
-            .then((latest) => {
-              tracks = latest;
-              tracksAt = Date.now();
-              paintTracks();
-            })
-            .catch(() => {});
-        });
-      </script>
-      <aside class="box panel panel-right no-mobile" transition:persist="right-panel" transition:animate="none">
-        <a
-          class="gh-chart"
-          href="https://github.com/Lavanic"
-          target="_blank"
-          rel="noopener"
-          aria-label="GitHub contributions, last 14 weeks"
-        >
-          {Array.from({ length: GH_CELLS }, (_, i) => (
-            <div
-              class:list={['gh-cell', { 'is-future': i >= GH_CELLS - ghFuture }]}
-              data-lv={contributions[i]?.level}
-              title={contributions[i]?.title}
-            ></div>
-          ))}
-        </a>
-        <a
-          class="status"
-          href={STATUS_URL}
-          target="_blank"
-          rel="noopener"
-          title="My status, kept in a GitHub Gist"
-          hidden={status === null}
-        >
-          <span class="status-face" data-face={status?.face}>
-            {statusFace ? <img src={statusFace} width="45" height="45" alt={status?.face} /> : status?.face}
-          </span>
-          <span class="status-text">{status?.content}</span>
-          <span class="status-meta">
-            via {STATUS_VIA} ·{' '}
-            <span class="status-time" data-at={status?.updatedAt}>
-              {status && timeAgo(status.updatedAt)}
-            </span>
-          </span>
-        </a>
-        {commits.length > 0 && (
-          <section class="changelog">
-            <h2 class="changelog-title">
-              Changelog
-              <a class="changelog-head" href={`${REPO}/commit/${commits[0].hash}`} target="_blank" rel="noopener">
-                {commits[0].hash}
-              </a>
-            </h2>
-            <ul class="changelog-list">
-              {commits.map((c) => (
-                <li>
-                  {c.date} :{' '}
-                  <a href={`${REPO}/commit/${c.hash}`} target="_blank" rel="noopener">
-                    {c.hash}
-                  </a>
-                  <br />
-                  {c.subject}
-                </li>
-              ))}
-            </ul>
-            <p class="changelog-foot">
-              {commits.length} most recent commits,{' '}
-              <a href={`${REPO}/commits/main`} target="_blank" rel="noopener">
-                see the rest
-              </a>
-            </p>
+            </template>
           </section>
-        )}
-        <section class="counter" hidden={visits === null}>
-          <h2 class="counter-title">Visitors</h2>
-          <div class="counter-digits" role="img" aria-label={visits?.toString()}>
-            {visits !== null && toDigits(visits).map((digit) => <span>{digit}</span>)}
+          <p class="desk-note">
+            <i>psst!</i> I look better on ur laptop btw
+          </p>
+          <p class="nav-foot">
+            <span>
+              total site visitors: <span class="nav-hits">{visits ?? '...'}</span>
+            </span>
+            {commits[0] && (
+              <span>
+                updated @ {commits[0].date.slice(0, 5)},{' '}
+                <a href={`${REPO}/commit/${commits[0].hash}`} target="_blank" rel="noopener">
+                  {commits[0].hash}
+                </a>
+              </span>
+            )}
+          </p>
+        </nav>
+        <main class="box panel panel-center">
+          <div class="panel-content">
+            <slot />
           </div>
-        </section>
-        <p class="load-time" hidden></p>
-      </aside>
-      <script>
-        // Real time from the request to everything on the page finishing,
-        // from the browser's own timing. Page swaps are timed from the click.
-        const line = document.querySelector<HTMLElement>('.load-time');
-        const show = (ms: number) => {
-          if (!line || !(ms > 0)) return;
-          line.textContent = `this page loaded for you in ${Math.round(ms)} ms`;
-          line.hidden = false;
-        };
-        const firstLoad = () => {
-          const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
-          if (nav) show(nav.loadEventEnd - nav.startTime);
-        };
-        if (document.readyState === 'complete') setTimeout(firstLoad);
-        else addEventListener('load', () => setTimeout(firstLoad), { once: true });
+        </main>
+        <script>
+          import { fetchTracks, heading, type Track } from '../lib/lastfm';
 
-        let swapStart = 0;
-        document.addEventListener('astro:before-preparation', () => (swapStart = performance.now()));
-        document.addEventListener('astro:page-load', () => {
-          if (!swapStart) return;
-          show(performance.now() - swapStart);
-          swapStart = 0;
-        });
-      </script>
-      <script>
-        import { fetchDays, toCells } from '../lib/contributions';
-        import { fetchVisits, toDigits } from '../lib/goatcounter';
-        import { faceSrc, fetchStatus, timeAgo } from '../lib/status';
+          let tracks: Track[] = [];
+          let tracksAt = 0;
 
-        const ghCells = document.querySelectorAll<HTMLElement>('.gh-chart .gh-cell');
+          const paintHeading = (box: HTMLElement, track: Pick<Track, 'playing' | 'at'>) => {
+            const { live, label, state } = heading(track);
+            box.classList.toggle('is-live', live);
+            box.querySelector('.playing-label')!.textContent = label;
+            box.querySelector('.playing-state')!.textContent = state;
+          };
 
-        if (ghCells.length) {
-          const future = 6 - new Date().getDay();
-          ghCells.forEach((cell, i) => {
-            cell.classList.toggle('is-future', i >= ghCells.length - future);
+          const paintTracks = () => {
+            const box = document.querySelector<HTMLElement>('.playing');
+            const template = box?.querySelector<HTMLTemplateElement>('.playing-template');
+            if (!box || !template || tracks.length === 0) return;
+            paintHeading(box, tracks[0]);
+            box.querySelector('.playing-list')!.replaceChildren(
+              ...tracks.map((t) => {
+                const li = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+                li.querySelector<HTMLAnchorElement>('.playing-row')!.href = t.url;
+                li.querySelector('.playing-song')!.textContent = t.title;
+                li.querySelector('.playing-artist')!.textContent = t.artist;
+                if (t.art) {
+                  const blank = li.querySelector('.playing-art')!;
+                  const img = new Image(64, 64);
+                  for (const { name, value } of blank.attributes) img.setAttribute(name, value);
+                  img.src = t.art;
+                  img.alt = '';
+                  img.decoding = 'async';
+                  blank.replaceWith(img);
+                }
+                return li;
+              }),
+            );
+            box.hidden = false;
+          };
+
+          document.addEventListener('astro:after-swap', paintTracks);
+          document.addEventListener('astro:page-load', () => {
+            const box = document.querySelector<HTMLElement>('.playing');
+            if (!box) return;
+            if (tracks.length === 0 && box.dataset.at) paintHeading(box, { playing: false, at: Number(box.dataset.at) });
+            if (Date.now() - tracksAt < 60000) return;
+            fetchTracks()
+              .then((latest) => {
+                tracks = latest;
+                tracksAt = Date.now();
+                paintTracks();
+              })
+              .catch(() => {});
+          });
+        </script>
+        <aside class="box panel panel-right no-mobile" transition:persist="right-panel" transition:animate="none">
+          <a
+            class="gh-chart"
+            href="https://github.com/Lavanic"
+            target="_blank"
+            rel="noopener"
+            aria-label="GitHub contributions, last 14 weeks"
+          >
+            {Array.from({ length: GH_CELLS }, (_, i) => (
+              <div
+                class:list={['gh-cell', { 'is-future': i >= GH_CELLS - ghFuture }]}
+                data-lv={contributions[i]?.level}
+                title={contributions[i]?.title}
+              ></div>
+            ))}
+          </a>
+          <a
+            class="status"
+            href={STATUS_URL}
+            target="_blank"
+            rel="noopener"
+            title="My status, kept in a GitHub Gist"
+            hidden={status === null}
+          >
+            <span class="status-face" data-face={status?.face}>
+              {statusFace ? <img src={statusFace} width="45" height="45" alt={status?.face} /> : status?.face}
+            </span>
+            <span class="status-text">{status?.content}</span>
+            <span class="status-meta">
+              via {STATUS_VIA} ·{' '}
+              <span class="status-time" data-at={status?.updatedAt}>
+                {status && timeAgo(status.updatedAt)}
+              </span>
+            </span>
+          </a>
+          {commits.length > 0 && (
+            <section class="changelog">
+              <h2 class="changelog-title">
+                Changelog
+                <a class="changelog-head" href={`${REPO}/commit/${commits[0].hash}`} target="_blank" rel="noopener">
+                  {commits[0].hash}
+                </a>
+              </h2>
+              <ul class="changelog-list">
+                {commits.map((c) => (
+                  <li>
+                    {c.date} :{' '}
+                    <a href={`${REPO}/commit/${c.hash}`} target="_blank" rel="noopener">
+                      {c.hash}
+                    </a>
+                    <br />
+                    {c.subject}
+                  </li>
+                ))}
+              </ul>
+              <p class="changelog-foot">
+                {commits.length} most recent commits,{' '}
+                <a href={`${REPO}/commits/main`} target="_blank" rel="noopener">
+                  see the rest
+                </a>
+              </p>
+            </section>
+          )}
+          <section class="counter" hidden={visits === null}>
+            <h2 class="counter-title">Visitors</h2>
+            <div class="counter-digits" role="img" aria-label={visits?.toString()}>
+              {visits !== null && toDigits(visits).map((digit) => <span>{digit}</span>)}
+            </div>
+          </section>
+          <p class="load-time" hidden></p>
+        </aside>
+        <script>
+          // Real time from the request to everything on the page finishing,
+          // from the browser's own timing. Page swaps are timed from the click.
+          const line = document.querySelector<HTMLElement>('.load-time');
+          const show = (ms: number) => {
+            if (!line || !(ms > 0)) return;
+            line.textContent = `this page loaded for you in ${Math.round(ms)} ms`;
+            line.hidden = false;
+          };
+          const firstLoad = () => {
+            const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+            if (nav) show(nav.loadEventEnd - nav.startTime);
+          };
+          if (document.readyState === 'complete') setTimeout(firstLoad);
+          else addEventListener('load', () => setTimeout(firstLoad), { once: true });
+
+          let swapStart = 0;
+          document.addEventListener('astro:before-preparation', () => (swapStart = performance.now()));
+          document.addEventListener('astro:page-load', () => {
+            if (!swapStart) return;
+            show(performance.now() - swapStart);
+            swapStart = 0;
+          });
+        </script>
+        <script>
+          import { fetchDays, toCells } from '../lib/contributions';
+          import { fetchVisits, toDigits } from '../lib/goatcounter';
+          import { faceSrc, fetchStatus, timeAgo } from '../lib/status';
+
+          const ghCells = document.querySelectorAll<HTMLElement>('.gh-chart .gh-cell');
+
+          if (ghCells.length) {
+            const future = 6 - new Date().getDay();
+            ghCells.forEach((cell, i) => {
+              cell.classList.toggle('is-future', i >= ghCells.length - future);
+            });
+
+            fetchDays()
+              .then((days) => {
+                toCells(days, ghCells.length).forEach((cell, i) => {
+                  ghCells[i].dataset.lv = String(cell.level);
+                  ghCells[i].title = cell.title;
+                });
+              })
+              .catch(() => {});
+          }
+
+          const counter = document.querySelector<HTMLElement>('.counter');
+          const digits = counter?.querySelector('.counter-digits');
+
+          if (counter && digits) {
+            fetchVisits()
+              .then((visits) => {
+                digits.replaceChildren(
+                  ...toDigits(visits).map((digit) => {
+                    const span = document.createElement('span');
+                    span.textContent = digit;
+                    return span;
+                  }),
+                );
+                digits.setAttribute('aria-label', String(visits));
+                counter.hidden = false;
+                document.querySelectorAll<HTMLElement>('.nav-hits').forEach((el) => {
+                  el.textContent = String(visits);
+                });
+              })
+              .catch(() => {});
+          }
+
+          const note = document.querySelector<HTMLElement>('.status');
+
+          if (note) {
+            const face = note.querySelector<HTMLElement>('.status-face')!;
+            const time = note.querySelector<HTMLElement>('.status-time')!;
+            const tick = () => {
+              if (time.dataset.at) time.textContent = timeAgo(time.dataset.at);
+            };
+            tick();
+            setInterval(tick, 60000);
+            fetchStatus()
+              .then((status) => {
+                if (face.dataset.face !== status.face) {
+                  const src = faceSrc(status.face);
+                  if (src) {
+                    const img = new Image(45, 45);
+                    img.src = src;
+                    img.alt = status.face;
+                    face.replaceChildren(img);
+                  } else {
+                    face.textContent = status.face;
+                  }
+                  face.dataset.face = status.face;
+                }
+                note.querySelector('.status-text')!.textContent = status.content;
+                time.dataset.at = status.updatedAt;
+                tick();
+                note.hidden = false;
+              })
+              .catch(() => {});
+          }
+
+          document.addEventListener('astro:after-swap', () => {
+            fetchVisits()
+              .then((visits) => {
+                document.querySelectorAll<HTMLElement>('.nav-hits').forEach((el) => {
+                  el.textContent = String(visits);
+                });
+              })
+              .catch(() => {});
           });
 
-          fetchDays()
-            .then((days) => {
-              toCells(days, ghCells.length).forEach((cell, i) => {
-                ghCells[i].dataset.lv = String(cell.level);
-                ghCells[i].title = cell.title;
-              });
-            })
-            .catch(() => {});
-        }
-
-        const counter = document.querySelector<HTMLElement>('.counter');
-        const digits = counter?.querySelector('.counter-digits');
-
-        if (counter && digits) {
-          fetchVisits()
-            .then((visits) => {
-              digits.replaceChildren(
-                ...toDigits(visits).map((digit) => {
-                  const span = document.createElement('span');
-                  span.textContent = digit;
-                  return span;
-                }),
-              );
-              digits.setAttribute('aria-label', String(visits));
-              counter.hidden = false;
-              document.querySelectorAll<HTMLElement>('.nav-hits').forEach((el) => {
-                el.textContent = String(visits);
-              });
-            })
-            .catch(() => {});
-        }
-
-        const note = document.querySelector<HTMLElement>('.status');
-
-        if (note) {
-          const face = note.querySelector<HTMLElement>('.status-face')!;
-          const time = note.querySelector<HTMLElement>('.status-time')!;
-          const tick = () => {
-            if (time.dataset.at) time.textContent = timeAgo(time.dataset.at);
-          };
-          tick();
-          setInterval(tick, 60000);
-          fetchStatus()
-            .then((status) => {
-              if (face.dataset.face !== status.face) {
-                const src = faceSrc(status.face);
-                if (src) {
-                  const img = new Image(45, 45);
-                  img.src = src;
-                  img.alt = status.face;
-                  face.replaceChildren(img);
-                } else {
-                  face.textContent = status.face;
-                }
-                face.dataset.face = status.face;
-              }
-              note.querySelector('.status-text')!.textContent = status.content;
-              time.dataset.at = status.updatedAt;
-              tick();
-              note.hidden = false;
-            })
-            .catch(() => {});
-        }
-
-        document.addEventListener('astro:after-swap', () => {
-          fetchVisits()
-            .then((visits) => {
-              document.querySelectorAll<HTMLElement>('.nav-hits').forEach((el) => {
-                el.textContent = String(visits);
-              });
-            })
-            .catch(() => {});
-        });
-
-        let changelogScroll = 0;
-        document.addEventListener('astro:before-swap', () => {
-          changelogScroll = document.querySelector('.changelog-list')?.scrollTop ?? 0;
-        });
-        document.addEventListener('astro:after-swap', () => {
-          const list = document.querySelector('.changelog-list');
-          if (list) list.scrollTop = changelogScroll;
-        });
-      </script>
+          let changelogScroll = 0;
+          document.addEventListener('astro:before-swap', () => {
+            changelogScroll = document.querySelector('.changelog-list')?.scrollTop ?? 0;
+          });
+          document.addEventListener('astro:after-swap', () => {
+            const list = document.querySelector('.changelog-list');
+            if (list) list.scrollTop = changelogScroll;
+          });
+        </script>
+      </div>
     </div>
     {buttons.length > 0 && (
       <div class="row wall no-mobile" transition:persist="wall" transition:animate="none">
@@ -868,6 +870,12 @@ try {
   }
 
   /* Row of three panels below the stamp bar.*/
+  .fold {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+  }
+
   .main-row {
     display: flex;
     gap: var(--gap);
@@ -1483,10 +1491,16 @@ try {
       space. Extend leftward (width: 110%, all offset on the left side) so
       the left panel pokes past the header on mobile. */
 
+    .fold {
+      min-height: calc((100vh - var(--page-padding)) / var(--scale));
+      min-height: calc((100svh - var(--page-padding)) / var(--scale));
+    }
+
     .main-row {
       width: 102%;
       left: -2%;
-      min-height: calc(760px + (150vh - 760px) * var(--phone));
+      min-height: 760px;
+      flex-grow: 1;
     }
 
     .panel-left {

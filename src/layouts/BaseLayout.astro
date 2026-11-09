@@ -178,6 +178,7 @@ const identity = {
 <style is:global>
   :root {
     --gap: 10px;
+    --page-padding: 20px;
     --container-width: 960px;
     --border-inner: rgb(0, 15, 149);
     --border-outer: rgb(96, 96, 96);
@@ -207,7 +208,7 @@ const identity = {
     position: relative;
     display: flex;
     justify-content: center;
-    padding: 20px;
+    padding: var(--page-padding);
     background-color: #202e46;
     font-family: 'Noto Sans', sans-serif;
   }
