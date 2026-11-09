@@ -1003,8 +1003,10 @@ try {
       box-shadow 0.2s;
   }
 
-  .nav-btn:last-child {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.45);
+  @media (min-width: 1021px) {
+    .nav-btn:last-child {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.45);
+    }
   }
 
   .gh-cell {
