@@ -50,23 +50,20 @@ const identity = {
         const PAGE_PADDING = 20;
         const MAX_WIDTH = 0.6;
         const FLOOR = 0.7;
+        const PHONE_SHARE = 0.88;
         const html = document.documentElement;
         let width = 0;
         let fit = '';
         const apply = () => {
-          if (fit) {
-            html.style.setProperty('--fit', fit);
-            html.setAttribute('data-fit', '');
-          } else {
-            html.style.removeProperty('--fit');
-            html.removeAttribute('data-fit');
-          }
+          html.style.setProperty('--fit', fit);
+          html.setAttribute('data-fit', '');
         };
         const measure = () => {
           if (html.clientWidth === width) return;
           width = html.clientWidth;
-          const scale = Math.min((innerHeight - PAGE_PADDING) / FOLD_HEIGHT, (MAX_WIDTH * width) / 960);
-          fit = width > 1020 ? Math.max(FLOOR, scale).toFixed(4) : '';
+          const desktop = Math.min((innerHeight - PAGE_PADDING) / FOLD_HEIGHT, (MAX_WIDTH * width) / 960);
+          const phone = (PHONE_SHARE * width) / 960;
+          fit = (innerWidth > 1020 ? Math.max(FLOOR, desktop) : phone).toFixed(4);
           apply();
         };
         measure();
@@ -295,10 +292,8 @@ const identity = {
       --scale: 0.75;
     }
   }
-  @media (min-width: 1021px) {
-    html[data-fit] .layout {
-      --scale: var(--fit);
-    }
+  html[data-fit] .layout {
+    --scale: var(--fit);
   }
 
   /* ── Mobile scaling ──────────────────────────────────────────────────────
