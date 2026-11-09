@@ -460,20 +460,26 @@ try {
             box.hidden = false;
           };
 
+          const refresh = () => {
+            if (document.hidden || Date.now() - tracksAt < 55000) return;
+            tracksAt = Date.now();
+            fetchTracks()
+              .then((latest) => {
+                tracks = latest;
+                paintTracks();
+              })
+              .catch(() => {});
+          };
+
           document.addEventListener('astro:after-swap', paintTracks);
           document.addEventListener('astro:page-load', () => {
             const box = document.querySelector<HTMLElement>('.playing');
             if (!box) return;
             if (tracks.length === 0 && box.dataset.at) paintHeading(box, { playing: false, at: Number(box.dataset.at) });
-            if (Date.now() - tracksAt < 60000) return;
-            fetchTracks()
-              .then((latest) => {
-                tracks = latest;
-                tracksAt = Date.now();
-                paintTracks();
-              })
-              .catch(() => {});
+            refresh();
           });
+          document.addEventListener('visibilitychange', refresh);
+          setInterval(refresh, 60000);
         </script>
         <aside class="box panel panel-right no-mobile" transition:persist="right-panel" transition:animate="none">
           <a
