@@ -353,10 +353,10 @@ try {
           )}
         </div>
         <section class="playing no-mobile" data-at={playedAt ?? undefined} hidden={tracks.length === 0}>
-          <h3 class="playing-title">
+          <h2 class="playing-title">
             <span class="playing-label">{trackHeading?.label}</span>
             <small class="playing-state">{trackHeading?.state}</small>
-          </h3>
+          </h2>
           <ol class="playing-list">
             {tracks.map((t) => (
               <li>
@@ -511,12 +511,12 @@ try {
         </a>
         {commits.length > 0 && (
           <section class="changelog">
-            <h3 class="changelog-title">
+            <h2 class="changelog-title">
               Changelog
               <a class="changelog-head" href={`${REPO}/commit/${commits[0].hash}`} target="_blank" rel="noopener">
                 {commits[0].hash}
               </a>
-            </h3>
+            </h2>
             <ul class="changelog-list">
               {commits.map((c) => (
                 <li>
@@ -538,7 +538,7 @@ try {
           </section>
         )}
         <section class="counter" hidden={visits === null}>
-          <h3 class="counter-title">Visitors</h3>
+          <h2 class="counter-title">Visitors</h2>
           <div class="counter-digits" role="img" aria-label={visits?.toString()}>
             {visits !== null && toDigits(visits).map((digit) => <span>{digit}</span>)}
           </div>
@@ -940,7 +940,7 @@ try {
     --label: url('/images/nav_offsite.png');
   }
 
-  .visually-hidden {
+  :global(.visually-hidden) {
     position: absolute;
     width: 1px;
     height: 1px;
