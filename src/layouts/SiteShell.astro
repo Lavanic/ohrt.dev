@@ -475,7 +475,8 @@ try {
           document.addEventListener('astro:page-load', () => {
             const box = document.querySelector<HTMLElement>('.playing');
             if (!box) return;
-            if (tracks.length === 0 && box.dataset.at) paintHeading(box, { playing: false, at: Number(box.dataset.at) });
+            if (tracks.length === 0 && box.dataset.at)
+              paintHeading(box, { playing: false, at: Number(box.dataset.at) });
             refresh();
           });
           document.addEventListener('visibilitychange', refresh);
@@ -1249,7 +1250,7 @@ try {
     column-gap: 7px;
     margin: 16px 18px 22px;
     padding: 16px 12px 10px;
-    background: linear-gradient(170deg, #b4d8ff, #7fb4ec);
+    background: linear-gradient(170deg, #a4c8ee, #70a1d5);
     color: #112c4f;
     /* background: linear-gradient(170deg, #fffbc2, #f6e97a);
     color: #4a3b00; */
