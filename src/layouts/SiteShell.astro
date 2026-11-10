@@ -362,11 +362,6 @@ try {
               {tracks.map((t) => (
                 <li>
                   <a class="playing-row" href={t.url} target="_blank" rel="noopener">
-                    {t.art ? (
-                      <img class="playing-art" src={t.art} width="64" height="64" alt="" decoding="async" />
-                    ) : (
-                      <span class="playing-art" />
-                    )}
                     <span class="playing-text">
                       <span class="playing-song">{t.title}</span>
                       <span class="playing-artist">{t.artist}</span>
@@ -384,7 +379,6 @@ try {
             <template class="playing-template">
               <li>
                 <a class="playing-row" target="_blank" rel="noopener">
-                  <span class="playing-art"></span>
                   <span class="playing-text">
                     <span class="playing-song"></span>
                     <span class="playing-artist"></span>
@@ -445,15 +439,6 @@ try {
                 li.querySelector<HTMLAnchorElement>('.playing-row')!.href = t.url;
                 li.querySelector('.playing-song')!.textContent = t.title;
                 li.querySelector('.playing-artist')!.textContent = t.artist;
-                if (t.art) {
-                  const blank = li.querySelector('.playing-art')!;
-                  const img = new Image(64, 64);
-                  for (const { name, value } of blank.attributes) img.setAttribute(name, value);
-                  img.src = t.art;
-                  img.alt = '';
-                  img.decoding = 'async';
-                  blank.replaceWith(img);
-                }
                 return li;
               }),
             );
@@ -1153,16 +1138,6 @@ try {
 
   .playing-row:hover .playing-song {
     text-decoration: underline;
-  }
-
-  .playing-art {
-    display: block;
-    flex: none;
-    width: 40px;
-    height: 40px;
-    box-sizing: border-box;
-    border: 1px solid #cfe6ff;
-    background: #263e66;
   }
 
   .playing-text {

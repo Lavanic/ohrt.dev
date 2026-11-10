@@ -5,12 +5,9 @@ const LASTFM_URL =
   '&user=oliverohrt&limit=1&format=json&api_key=' +
   LASTFM_KEY;
 
-const PLACEHOLDER = '2a96cbd8b46e442fc41c2b86b821562f';
-
 export type Track = {
   title: string;
   artist: string;
-  art: string | null;
   url: string;
   playing: boolean;
   at: number | null;
@@ -22,7 +19,6 @@ type RawTrack = {
   name: string;
   url: string;
   artist: { '#text': string };
-  image?: { size: string; '#text': string }[];
   date?: { uts: string };
   '@attr'?: { nowplaying?: string };
 };
@@ -32,17 +28,13 @@ export async function fetchTracks(): Promise<Track[]> {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const raw: RawTrack[] = (await res.json())?.recenttracks?.track ?? [];
   if (!raw[0]?.name) throw new Error('no tracks');
-  return raw.slice(0, 3).map((t) => {
-    const art = t.image?.find((i) => i.size === 'medium')?.['#text'] ?? '';
-    return {
-      title: t.name,
-      artist: t.artist['#text'],
-      art: art && !art.includes(PLACEHOLDER) ? art : null,
-      url: t.url,
-      playing: t['@attr']?.nowplaying === 'true',
-      at: t.date?.uts ? Number(t.date.uts) * 1000 : null,
-    };
-  });
+  return raw.slice(0, 3).map((t) => ({
+    title: t.name,
+    artist: t.artist['#text'],
+    url: t.url,
+    playing: t['@attr']?.nowplaying === 'true',
+    at: t.date?.uts ? Number(t.date.uts) * 1000 : null,
+  }));
 }
 
 const LIVE_FOR = 15 * 60 * 1000;
