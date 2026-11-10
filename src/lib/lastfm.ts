@@ -1,8 +1,8 @@
 // Read-only key so it's ok here... I think.
 const LASTFM_KEY = '52f94a497db597d18bc7023b38097315';
-const LASTFM_URL =
+const RECENT_URL =
   'https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks' +
-  '&user=oliverohrt&limit=1&format=json&api_key=' +
+  '&user=oliverohrt&limit=3&format=json&api_key=' +
   LASTFM_KEY;
 
 export type Track = {
@@ -12,8 +12,6 @@ export type Track = {
   playing: boolean;
   at: number | null;
 };
-
-const RECENT_URL = LASTFM_URL.replace('&limit=1', '&limit=3');
 
 type RawTrack = {
   name: string;

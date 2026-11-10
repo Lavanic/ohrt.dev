@@ -418,8 +418,12 @@ try {
         <script>
           import { fetchTracks, heading, type Track } from '../lib/lastfm';
 
+          const LIVE_EVERY = 30_000;
+          const IDLE_EVERY = 180_000;
           let tracks: Track[] = [];
           let tracksAt = 0;
+
+          const every = () => (tracks[0] && heading(tracks[0]).live ? LIVE_EVERY : IDLE_EVERY);
 
           const paintHeading = (box: HTMLElement, track: Pick<Track, 'playing' | 'at'>) => {
             const { live, label, state } = heading(track);
@@ -446,7 +450,7 @@ try {
           };
 
           const refresh = () => {
-            if (document.hidden || Date.now() - tracksAt < 55000) return;
+            if (document.hidden || Date.now() - tracksAt < every() - 5000) return;
             tracksAt = Date.now();
             fetchTracks()
               .then((latest) => {
@@ -465,7 +469,7 @@ try {
             refresh();
           });
           document.addEventListener('visibilitychange', refresh);
-          setInterval(refresh, 60000);
+          setInterval(refresh, LIVE_EVERY);
         </script>
         <aside class="box panel panel-right no-mobile" transition:persist="right-panel" transition:animate="none">
           <a
