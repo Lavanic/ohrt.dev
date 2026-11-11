@@ -34,7 +34,7 @@ const stamps = await Promise.all(
   }),
 );
 // Roughly one bar's worth: these load right away, the rest as they scroll near
-const EAGER_STAMPS = 16;
+const EAGER_STAMPS = 8;
 
 const buttonDir = path.join(process.cwd(), 'public/buttons');
 const buttonFiles = (await readdir(buttonDir)).filter((f) => /\.(png|gif|jpe?g|webp|avif)$/i.test(f)).sort();
@@ -254,9 +254,8 @@ try {
         </div>
         <noscript>
           <style is:inline>
-            /* The is-ready class never arrives without JS, so force the marquee visible */
+            /* The is-ready class never arrives without JS, so start the marquee here */
             .marquee .marquee__inner {
-              opacity: 1 !important;
               animation-play-state: running !important;
             }
             @media (prefers-reduced-motion: reduce) {
@@ -843,13 +842,10 @@ try {
     will-change: transform;
     animation: stamp-scroll 35s linear infinite;
     animation-play-state: paused;
-    opacity: 0;
-    transition: opacity 0.3s ease;
   }
 
   .marquee.is-ready .marquee__inner {
     animation-play-state: running;
-    opacity: 1;
   }
 
   /* When the script drives the transform, the CSS animation has to get out
@@ -873,7 +869,6 @@ try {
   @media (prefers-reduced-motion: reduce) {
     .marquee__inner {
       animation-play-state: paused !important;
-      opacity: 1 !important;
     }
     .welcome-scroll span {
       animation-play-state: paused !important;
