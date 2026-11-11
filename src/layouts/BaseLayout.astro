@@ -187,6 +187,32 @@ const identity = {
       document.addEventListener('astro:after-swap', () => {
         (window as any).goatcounter?.count?.({ path: location.pathname });
       });
+
+      // The other pages are fetched ahead of a click, but only once this page has
+      // everything it needs. Before, they shared the line with its images and fonts.
+      // Done by hand because importing astro:prefetch here splits it into one more
+      // script file, and every script on the page then waits for that file.
+      const warmed = new Set([location.pathname]);
+      const warm = () => {
+        const connection = (navigator as any).connection;
+        if (connection?.saveData || /2g/.test(connection?.effectiveType)) return;
+        for (const a of document.querySelectorAll<HTMLAnchorElement>('a[href^="/"]')) {
+          if (warmed.has(a.pathname)) continue;
+          warmed.add(a.pathname);
+          const link = document.createElement('link');
+          if (link.relList?.supports?.('prefetch')) {
+            link.rel = 'prefetch';
+            link.href = a.href;
+            document.head.append(link);
+          } else {
+            fetch(a.href, { priority: 'low' }).catch(() => {});
+          }
+        }
+      };
+      const afterLoad = () => setTimeout(warm, 300);
+      if (document.readyState === 'complete') afterLoad();
+      else addEventListener('load', afterLoad, { once: true });
+      document.addEventListener('astro:after-swap', afterLoad);
     </script>
   </body>
 </html>
