@@ -419,6 +419,9 @@ try {
             <span>
               total site visitors: <span class="nav-hits">{visits ?? '...'}</span>
             </span>
+            <span class="nav-load" hidden>
+              site loaded in: <span class="nav-load-ms"></span> ms
+            </span>
             {commits[0] && (
               <span>
                 updated @ {commits[0].date.slice(0, 5)},{' '}
@@ -572,9 +575,17 @@ try {
           // from the browser's own timing. Page swaps are timed from the click.
           const line = document.querySelector<HTMLElement>('.load-time');
           const show = (ms: number) => {
-            if (!line || !(ms > 0)) return;
-            line.textContent = `this page loaded for you in ${Math.round(ms)} ms`;
-            line.hidden = false;
+            if (!(ms > 0)) return;
+            if (line) {
+              line.textContent = `this page loaded for you in ${Math.round(ms)} ms`;
+              line.hidden = false;
+            }
+            // The phone nav is not persisted across page swaps, so look it up each time
+            const nav = document.querySelector<HTMLElement>('.nav-load');
+            if (nav) {
+              nav.querySelector('.nav-load-ms')!.textContent = String(Math.round(ms));
+              nav.hidden = false;
+            }
           };
           const firstLoad = () => {
             const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
@@ -1649,6 +1660,10 @@ try {
     .nav-foot > span {
       display: block;
       white-space: nowrap;
+    }
+
+    .nav-foot > span[hidden] {
+      display: none;
     }
 
     .nav-foot a {
