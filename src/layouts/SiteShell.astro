@@ -1,10 +1,11 @@
 ---
 import { NAVIGATE, OFFSITE } from '../lib/nav';
 import { BUTTON_LINKS } from '../lib/buttons';
-import { readdir } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import path from 'node:path';
+import { imageMetadata } from 'astro/assets/utils';
 import BaseLayout from './BaseLayout.astro';
 import { WEEKS, fetchDays, toCells, type Cell } from '../lib/contributions';
 import { fetchVisits, toDigits } from '../lib/goatcounter';
@@ -24,7 +25,16 @@ const { title = 'ohrt.dev', description } = Astro.props;
 // emit a second hashed copy of every stamp into dist/_astro/ that nothing uses.
 const stampDir = path.join(process.cwd(), 'public/stamps');
 const stampFiles = (await readdir(stampDir)).filter((f) => /\.(png|gif|jpe?g|webp|avif)$/i.test(f)).sort();
-const stamps = stampFiles.map((f) => `/stamps/${f}`);
+// Width and height go on every <img> so the strip has its final size before any
+// stamp has loaded. That is what lets the off-screen ones load lazily.
+const stamps = await Promise.all(
+  stampFiles.map(async (f) => {
+    const { width, height } = await imageMetadata(await readFile(path.join(stampDir, f)));
+    return { src: `/stamps/${f}`, width, height };
+  }),
+);
+// Roughly one bar's worth: these load right away, the rest as they scroll near
+const EAGER_STAMPS = 16;
 
 const buttonDir = path.join(process.cwd(), 'public/buttons');
 const buttonFiles = (await readdir(buttonDir)).filter((f) => /\.(png|gif|jpe?g|webp|avif)$/i.test(f)).sort();
@@ -226,13 +236,19 @@ try {
       <div class="box subheader stamps" transition:persist="stamp-bar" transition:animate="none">
         <div class="marquee" role="img" aria-label="Stamp collection">
           <div class="marquee__inner">
-            {paddedStamps.map((src) => (
-              <img src={src} alt="" fetchpriority="low" decoding="async" />
+            {paddedStamps.map((stamp, i) => (
+              <img
+                {...stamp}
+                alt=""
+                fetchpriority="low"
+                decoding="async"
+                loading={i < EAGER_STAMPS ? 'eager' : 'lazy'}
+              />
             ))}
           </div>
           <div class="marquee__inner" aria-hidden="true">
-            {paddedStamps.map((src) => (
-              <img src={src} alt="" fetchpriority="low" decoding="async" />
+            {paddedStamps.map((stamp) => (
+              <img {...stamp} alt="" fetchpriority="low" decoding="async" loading="lazy" />
             ))}
           </div>
         </div>
@@ -301,16 +317,9 @@ try {
             });
             reduced.addEventListener('change', () => (reduced.matches ? stop() : start()));
 
-            // Fade the bar in once every stamp has loaded or failed, then start
-            const imgs = marquee.querySelectorAll('img');
-            let loaded = 0;
-            const check = () => {
-              if (++loaded >= imgs.length) {
-                marquee.classList.add('is-ready');
-                start();
-              }
-            };
-            imgs.forEach((img) => (img.complete ? check() : (img.onload = img.onerror = check)));
+            // Every stamp carries its size, so the strip is measurable straight away
+            marquee.classList.add('is-ready');
+            start();
           }
         </script>
       </div>
