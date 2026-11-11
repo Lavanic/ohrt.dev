@@ -73,8 +73,26 @@ const identity = {
     <!-- The text fonts are asked for before anything else, and the router script last.
          When the script won that race it forced the first layout in a fallback font,
          and the text was laid out a second time once the real one arrived. -->
-    <link rel="preload" as="font" type="font/woff2" href="/fonts/NotoSans-Regular.woff2" crossorigin />
-    <link rel="preload" as="font" type="font/woff2" href="/fonts/NotoSans-Bold.woff2" crossorigin />
+    {['Regular', 'Bold'].map((weight) => (
+      <>
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href={`/fonts/NotoSans-${weight}.woff2`}
+          media="not all and (hover: none) and (pointer: coarse)"
+          crossorigin
+        />
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href={`/fonts/NotoSans-${weight}-touch.woff2`}
+          media="(hover: none) and (pointer: coarse)"
+          crossorigin
+        />
+      </>
+    ))}
     <link
       rel="preload"
       as="font"
@@ -119,7 +137,20 @@ const identity = {
     <link rel="preconnect" href={GOATCOUNTER} crossorigin />
     <!-- The background, header.webp and the two nav labels live in CSS, so without
          a preload the browser only discovers them after the stylesheet is parsed -->
-    <link rel="preload" as="image" href="/images/background.avif" type="image/avif" fetchpriority="high" />
+    <link
+      rel="preload"
+      as="image"
+      href="/images/background.avif"
+      type="image/avif"
+      media="not all and (max-width: 1020px) and (orientation: portrait)"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="/images/background-phone.avif"
+      type="image/avif"
+      media="(max-width: 1020px) and (orientation: portrait)"
+    />
     <link rel="preload" as="image" href="/images/header.webp" fetchpriority="high" />
     <link rel="preload" as="image" href="/images/nav_navigate.webp" fetchpriority="high" />
     <link rel="preload" as="image" href="/images/nav_offsite.webp" fetchpriority="high" />
@@ -157,6 +188,51 @@ const identity = {
         font-weight: 700;
         font-style: italic;
         font-display: swap;
+      }
+      /* The -touch files hold the latin glyphs without TrueType hinting, half the
+         size. Only Windows reads the hints, so phones and tablets lose nothing.
+         A character outside the range falls back to the full file above. */
+      @media (hover: none) and (pointer: coarse) {
+        @font-face {
+          font-family: 'Noto Sans';
+          src: url('/fonts/NotoSans-Regular-touch.woff2') format('woff2');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+          unicode-range:
+            U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
+            U+2212, U+FEFF, U+FFFD;
+        }
+        @font-face {
+          font-family: 'Noto Sans';
+          src: url('/fonts/NotoSans-Bold-touch.woff2') format('woff2');
+          font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+          unicode-range:
+            U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
+            U+2212, U+FEFF, U+FFFD;
+        }
+        @font-face {
+          font-family: 'Noto Sans';
+          src: url('/fonts/NotoSans-Italic-touch.woff2') format('woff2');
+          font-weight: 400;
+          font-style: italic;
+          font-display: swap;
+          unicode-range:
+            U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
+            U+2212, U+FEFF, U+FFFD;
+        }
+        @font-face {
+          font-family: 'Noto Sans';
+          src: url('/fonts/NotoSans-BoldItalic-touch.woff2') format('woff2');
+          font-weight: 700;
+          font-style: italic;
+          font-display: swap;
+          unicode-range:
+            U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
+            U+2212, U+FEFF, U+FFFD;
+        }
       }
     </style>
     <ClientRouter />
@@ -274,6 +350,18 @@ const identity = {
     background-repeat: no-repeat;
     opacity: 0.6;
     z-index: -1;
+  }
+
+  /* An upright phone or tablet only ever shows the middle of the background,
+     and most of that sits behind the page. background-phone.avif is that
+     middle strip, same height, so cover lands on the same pixels. */
+  @media (max-width: 1020px) and (orientation: portrait) {
+    body::before {
+      background-image: image-set(
+        url('/images/background-phone.avif') type('image/avif'),
+        url('/images/background.webp') type('image/webp')
+      );
+    }
   }
 
   .layout {
