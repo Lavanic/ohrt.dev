@@ -107,19 +107,28 @@ try {
     <div class="fold">
       <div class="box header" transition:persist="header" transition:animate="none">
         <h1 class="logo-wrap h-card" aria-label="Oliver Ohrt">
-          <img
-            class="logo-fallback p-name"
-            src="/images/logo_fallback.png"
-            width="740"
-            height="258"
-            draggable="false"
-            alt="Oliver Ohrt"
-          />
           <data class="u-url u-uid" value="https://ohrt.dev/"></data>
           <data class="u-photo" value="https://ohrt.dev/images/webmaster.webp"></data>
           <span class="logo-composite">
+            <img
+              class="logo-fallback p-name"
+              src="/images/gears_still.webp"
+              width="154"
+              height="258"
+              draggable="false"
+              alt="Oliver Ohrt"
+              fetchpriority="high"
+            />
             <canvas class="gears" width="154" height="258" aria-hidden="true"></canvas>
-            <img src="/images/static.webp" width="588" height="258" alt="" draggable="false" />
+            <img
+              class="logo-static"
+              src="/images/static.webp"
+              width="588"
+              height="258"
+              alt=""
+              draggable="false"
+              fetchpriority="high"
+            />
             <input class="haptic-tick" type="checkbox" switch tabindex="-1" aria-hidden="true" />
           </span>
         </h1>
@@ -131,7 +140,7 @@ try {
           const ctx = canvas?.getContext('2d');
 
           if (wrap && canvas && ctx) {
-            const COLS = 10;
+            const COLS = 15;
             const FRAMES = 15;
             const FW = 154;
             const FH = 258;
@@ -182,13 +191,14 @@ try {
               raf = requestAnimationFrame(step);
             };
 
+            // The still gears hold the canvas's place until the sheet can take over.
+            // They stay in the layout because a canvas has no size when scripting is off.
             const fallback = wrap.querySelector<HTMLElement>('.logo-fallback')!;
-            const composite = wrap.querySelector<HTMLElement>('.logo-composite')!;
 
             const start = () => {
               if (raf || reduced.matches) return;
-              fallback.style.display = 'none';
-              composite.style.opacity = '1';
+              blit(0);
+              fallback.style.visibility = 'hidden';
               last = performance.now();
               raf = requestAnimationFrame(step);
             };
@@ -196,8 +206,9 @@ try {
             const stop = () => {
               cancelAnimationFrame(raf);
               raf = 0;
-              composite.style.opacity = '';
-              fallback.style.display = '';
+              ctx.clearRect(0, 0, FW, FH);
+              drawn = -1;
+              fallback.style.visibility = '';
             };
 
             sheet
@@ -760,22 +771,23 @@ try {
     }
   }
 
-  .logo-fallback {
-    display: block;
-  }
-
-  .logo-composite img {
-    margin-left: -2px;
-    -webkit-user-drag: none;
-  }
-
-  .logo-composite {
+  .logo-composite canvas {
     position: absolute;
     top: 0;
     left: 0;
+  }
+
+  .logo-composite img {
+    -webkit-user-drag: none;
+  }
+
+  .logo-static {
+    margin-left: -2px;
+  }
+
+  .logo-composite {
+    position: relative;
     display: flex;
-    opacity: 0;
-    transition: opacity 0.1s ease;
   }
 
   .subheader {
@@ -1468,17 +1480,13 @@ try {
       height: calc(259px + 29px * var(--phone));
     }
 
+    .logo-composite canvas,
     .logo-fallback {
-      width: calc(740px + 83px * var(--phone));
-      height: calc(258px + 29px * var(--phone));
-    }
-
-    .logo-composite canvas {
       width: calc(154px + 17px * var(--phone));
       height: calc(258px + 29px * var(--phone));
     }
 
-    .logo-composite img {
+    .logo-static {
       width: calc(588px + 66px * var(--phone));
       height: calc(258px + 29px * var(--phone));
     }
