@@ -459,6 +459,8 @@ try {
           };
 
           const refresh = () => {
+            // offsetParent is null while the box is display: none (phones), so nothing polls for a hidden widget
+            if (document.querySelector<HTMLElement>('.playing')?.offsetParent === null) return;
             if (document.hidden || Date.now() - tracksAt < every() - 5000) return;
             tracksAt = Date.now();
             fetchTracks()
@@ -581,8 +583,11 @@ try {
           import { faceSrc, fetchStatus, timeAgo } from '../lib/status';
 
           const ghCells = document.querySelectorAll<HTMLElement>('.gh-chart .gh-cell');
+          // The right panel is display: none on phones. Its build-time content is still in
+          // the page, so skip the live refetches there instead of paying for hidden widgets.
+          const panelShown = document.querySelector<HTMLElement>('.panel-right')?.offsetParent != null;
 
-          if (ghCells.length) {
+          if (ghCells.length && panelShown) {
             const future = 6 - new Date().getDay();
             ghCells.forEach((cell, i) => {
               cell.classList.toggle('is-future', i >= ghCells.length - future);
@@ -630,26 +635,27 @@ try {
             };
             tick();
             setInterval(tick, 60000);
-            fetchStatus()
-              .then((status) => {
-                if (face.dataset.face !== status.face) {
-                  const src = faceSrc(status.face);
-                  if (src) {
-                    const img = new Image(45, 45);
-                    img.src = src;
-                    img.alt = status.face;
-                    face.replaceChildren(img);
-                  } else {
-                    face.textContent = status.face;
+            if (panelShown)
+              fetchStatus()
+                .then((status) => {
+                  if (face.dataset.face !== status.face) {
+                    const src = faceSrc(status.face);
+                    if (src) {
+                      const img = new Image(45, 45);
+                      img.src = src;
+                      img.alt = status.face;
+                      face.replaceChildren(img);
+                    } else {
+                      face.textContent = status.face;
+                    }
+                    face.dataset.face = status.face;
                   }
-                  face.dataset.face = status.face;
-                }
-                note.querySelector('.status-text')!.textContent = status.content;
-                time.dataset.at = status.updatedAt;
-                tick();
-                note.hidden = false;
-              })
-              .catch(() => {});
+                  note.querySelector('.status-text')!.textContent = status.content;
+                  time.dataset.at = status.updatedAt;
+                  tick();
+                  note.hidden = false;
+                })
+                .catch(() => {});
           }
 
           document.addEventListener('astro:after-swap', () => {
