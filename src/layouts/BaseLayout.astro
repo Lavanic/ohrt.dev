@@ -74,24 +74,14 @@ const identity = {
          When the script won that race it forced the first layout in a fallback font,
          and the text was laid out a second time once the real one arrived. -->
     {['Regular', 'Bold'].map((weight) => (
-      <>
-        <link
-          rel="preload"
-          as="font"
-          type="font/woff2"
-          href={`/fonts/NotoSans-${weight}.woff2`}
-          media="not all and (hover: none) and (pointer: coarse)"
-          crossorigin
-        />
-        <link
-          rel="preload"
-          as="font"
-          type="font/woff2"
-          href={`/fonts/NotoSans-${weight}-touch-basic.woff2`}
-          media="(hover: none) and (pointer: coarse)"
-          crossorigin
-        />
-      </>
+      <link
+        rel="preload"
+        as="font"
+        type="font/woff2"
+        href={`/fonts/NotoSans-${weight}.woff2`}
+        media="not all and (hover: none) and (pointer: coarse)"
+        crossorigin
+      />
     ))}
     <link
       rel="preload"
@@ -188,86 +178,6 @@ const identity = {
         font-weight: 700;
         font-style: italic;
         font-display: swap;
-      }
-      /* The -touch files hold the latin glyphs without TrueType hinting, half the
-         size. Only Windows reads the hints, so phones and tablets lose nothing.
-         A character outside the range falls back to the full file above. */
-      @media (hover: none) and (pointer: coarse) {
-        @font-face {
-          font-family: 'Noto Sans';
-          src: url('/fonts/NotoSans-Regular-touch.woff2') format('woff2');
-          font-weight: 400;
-          font-style: normal;
-          font-display: swap;
-          unicode-range:
-            U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
-            U+2212, U+FEFF, U+FFFD;
-        }
-        @font-face {
-          font-family: 'Noto Sans';
-          src: url('/fonts/NotoSans-Bold-touch.woff2') format('woff2');
-          font-weight: 700;
-          font-style: normal;
-          font-display: swap;
-          unicode-range:
-            U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
-            U+2212, U+FEFF, U+FFFD;
-        }
-        @font-face {
-          font-family: 'Noto Sans';
-          src: url('/fonts/NotoSans-Italic-touch.woff2') format('woff2');
-          font-weight: 400;
-          font-style: italic;
-          font-display: swap;
-          unicode-range:
-            U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
-            U+2212, U+FEFF, U+FFFD;
-        }
-        @font-face {
-          font-family: 'Noto Sans';
-          src: url('/fonts/NotoSans-BoldItalic-touch.woff2') format('woff2');
-          font-weight: 700;
-          font-style: italic;
-          font-display: swap;
-          unicode-range:
-            U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122,
-            U+2212, U+FEFF, U+FFFD;
-        }
-        /* Nearly all the text is plain English, and the -basic files hold just that.
-           Declared last so they win for their range; the files above stay as the
-           fallback for everything else. */
-        @font-face {
-          font-family: 'Noto Sans';
-          src: url('/fonts/NotoSans-Regular-touch-basic.woff2') format('woff2');
-          font-weight: 400;
-          font-style: normal;
-          font-display: swap;
-          unicode-range: U+0020-007E, U+00A0, U+00B7, U+00E0-00FF, U+2013-2014, U+2018-2019, U+201C-201D, U+2026;
-        }
-        @font-face {
-          font-family: 'Noto Sans';
-          src: url('/fonts/NotoSans-Bold-touch-basic.woff2') format('woff2');
-          font-weight: 700;
-          font-style: normal;
-          font-display: swap;
-          unicode-range: U+0020-007E, U+00A0, U+00B7, U+00E0-00FF, U+2013-2014, U+2018-2019, U+201C-201D, U+2026;
-        }
-        @font-face {
-          font-family: 'Noto Sans';
-          src: url('/fonts/NotoSans-Italic-touch-basic.woff2') format('woff2');
-          font-weight: 400;
-          font-style: italic;
-          font-display: swap;
-          unicode-range: U+0020-007E, U+00A0, U+00B7, U+00E0-00FF, U+2013-2014, U+2018-2019, U+201C-201D, U+2026;
-        }
-        @font-face {
-          font-family: 'Noto Sans';
-          src: url('/fonts/NotoSans-BoldItalic-touch-basic.woff2') format('woff2');
-          font-weight: 700;
-          font-style: italic;
-          font-display: swap;
-          unicode-range: U+0020-007E, U+00A0, U+00B7, U+00E0-00FF, U+2013-2014, U+2018-2019, U+201C-201D, U+2026;
-        }
       }
     </style>
     <ClientRouter />
@@ -367,6 +277,21 @@ const identity = {
     padding: var(--page-padding);
     background-color: #202e46;
     font-family: 'Noto Sans', sans-serif;
+  }
+
+  /* Phones and tablets use the font they ship with, so text needs no download
+     and never swaps. Noto Sans is declared above but only fetched when used. */
+  @media (hover: none) and (pointer: coarse) {
+    body {
+      font-family:
+        system-ui,
+        -apple-system,
+        'Segoe UI',
+        Roboto,
+        'Helvetica Neue',
+        Arial,
+        sans-serif;
+    }
   }
 
   body::before {
