@@ -42,7 +42,6 @@ const identity = {
 <html lang="en" transition:animate="none">
   <head>
     <meta charset="utf-8" />
-    <ClientRouter />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script is:inline>
       (() => {
@@ -71,6 +70,19 @@ const identity = {
         document.addEventListener('astro:after-swap', apply);
       })();
     </script>
+    <!-- The text fonts are asked for before anything else, and the router script last.
+         When the script won that race it forced the first layout in a fallback font,
+         and the text was laid out a second time once the real one arrived. -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/NotoSans-Regular.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/NotoSans-Bold.woff2" crossorigin />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/DSEG7Classic-Bold.woff2"
+      media="(min-width: 1021px)"
+      crossorigin
+    />
     <!-- Browser chrome color: works on Android Chrome + iOS Safari 15+ for address bar -->
     <meta name="theme-color" content="#202E46" />
     <meta name="color-scheme" content="only light" />
@@ -105,11 +117,13 @@ const identity = {
     <link rel="preconnect" href="https://github-contributions-api.jogruber.de" crossorigin />
     <link rel="preconnect" href="https://ws.audioscrobbler.com" crossorigin />
     <link rel="preconnect" href={GOATCOUNTER} crossorigin />
-    <!-- background.avif and header.png live in CSS, so without a preload the
-         browser only discovers them after the stylesheet is parsed -->
+    <!-- The background, header.webp and the two nav labels live in CSS, so without
+         a preload the browser only discovers them after the stylesheet is parsed -->
     <link rel="preload" as="image" href="/images/background.avif" type="image/avif" fetchpriority="high" />
-    <link rel="preload" as="image" href="/images/header.webp" />
-    <link rel="preload" as="image" href="/images/gears_sheet.webp" />
+    <link rel="preload" as="image" href="/images/header.webp" fetchpriority="high" />
+    <link rel="preload" as="image" href="/images/nav_navigate.webp" fetchpriority="high" />
+    <link rel="preload" as="image" href="/images/nav_offsite.webp" fetchpriority="high" />
+    <link rel="preload" as="image" href="/images/gears_sheet.webp" fetchpriority="low" />
     <style is:inline data-astro-transition-persist="dseg7">
       @font-face {
         font-family: 'DSEG7';
@@ -145,16 +159,7 @@ const identity = {
         font-display: swap;
       }
     </style>
-    <link rel="preload" as="font" type="font/woff2" href="/fonts/NotoSans-Regular.woff2" crossorigin />
-    <link rel="preload" as="font" type="font/woff2" href="/fonts/NotoSans-Bold.woff2" crossorigin />
-    <link
-      rel="preload"
-      as="font"
-      type="font/woff2"
-      href="/fonts/DSEG7Classic-Bold.woff2"
-      media="(min-width: 1021px)"
-      crossorigin
-    />
+    <ClientRouter />
   </head>
   <body>
     <slot />

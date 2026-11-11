@@ -517,7 +517,11 @@ try {
             hidden={status === null}
           >
             <span class="status-face" data-face={status?.face}>
-              {statusFace ? <img src={statusFace} width="45" height="45" alt={status?.face} /> : status?.face}
+              {statusFace ? (
+                <img src={statusFace} width="45" height="45" alt={status?.face} loading="lazy" />
+              ) : (
+                status?.face
+              )}
             </span>
             <span class="status-text">{status?.content}</span>
             <span class="status-meta">
