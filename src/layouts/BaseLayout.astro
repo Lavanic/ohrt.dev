@@ -160,13 +160,29 @@ const identity = {
   </head>
   <body>
     <slot />
-    <script
-      defer
-      src="https://cloud.umami.is/script.js"
-      data-website-id="02aa9e5f-726b-484a-99f2-e8fdd2e46275"
-      is:inline
-    ></script>
-    <script async src="https://gc.zgo.at/count.js" data-goatcounter={`${GOATCOUNTER}/count`} is:inline></script>
+    <script is:inline define:vars={{ GOATCOUNTER }}>
+      // Analytics show the visitor nothing, so they wait until the page itself has
+      // loaded. As plain script tags they held the load event open for up to a second.
+      (() => {
+        const add = (src, data) => {
+          const script = document.createElement('script');
+          script.async = true;
+          script.src = src;
+          Object.assign(script.dataset, data);
+          document.head.append(script);
+        };
+        const start = () =>
+          setTimeout(() => {
+            // count.js looks for its own script tag on every count, and the router
+            // drops injected tags from the head on a page swap. This setting survives.
+            window.goatcounter = { endpoint: `${GOATCOUNTER}/count` };
+            add('https://gc.zgo.at/count.js');
+            add('https://cloud.umami.is/script.js', { websiteId: '02aa9e5f-726b-484a-99f2-e8fdd2e46275' });
+          });
+        if (document.readyState === 'complete') start();
+        else addEventListener('load', start, { once: true });
+      })();
+    </script>
     <script>
       document.addEventListener('astro:after-swap', () => {
         (window as any).goatcounter?.count?.({ path: location.pathname });
