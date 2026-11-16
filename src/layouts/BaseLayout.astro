@@ -57,13 +57,28 @@ const identity = {
           html.style.setProperty('--fit', fit);
           html.setAttribute('data-fit', '');
         };
+        // When a phone turns, iOS Safari keeps the text sizes it worked out from the old --fit.
+        // Taking the page out of layout and back makes it work them out again, as a page change does.
+        const restyle = () => {
+          const layout = document.querySelector('.layout');
+          if (!layout) return;
+          const panes = [...layout.querySelectorAll('.panel-content')].map((pane) => [pane, pane.scrollTop]);
+          const [x, y] = [scrollX, scrollY];
+          layout.style.display = 'none';
+          void layout.offsetWidth;
+          layout.style.removeProperty('display');
+          for (const [pane, top] of panes) pane.scrollTop = top;
+          scrollTo(x, y);
+        };
         const measure = () => {
           if (html.clientWidth === width) return;
+          const turned = width !== 0;
           width = html.clientWidth;
           const desktop = Math.min((innerHeight - PAGE_PADDING) / FOLD_HEIGHT, (MAX_WIDTH * width) / 960);
           const phone = (PHONE_SHARE * width) / 960;
           fit = (innerWidth > 1020 ? Math.max(FLOOR, desktop) : phone).toFixed(4);
           apply();
+          if (turned && innerWidth <= 1020) restyle();
         };
         measure();
         addEventListener('resize', measure);
