@@ -134,7 +134,8 @@ try {
 
   .guestbook {
     position: relative;
-    flex: 1 1 auto;
+    /* never shrinks: a long list would spill over the panel's bottom padding */
+    flex: 1 0 auto;
     min-height: 240px;
     display: flex;
     flex-direction: column;
