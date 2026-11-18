@@ -5,9 +5,10 @@ import { GOATCOUNTER } from '../lib/goatcounter';
 interface Props {
   title: string;
   description?: string;
+  noindex?: boolean;
 }
 
-const { title, description = "Oliver's corner of the web." } = Astro.props;
+const { title, description = "Oliver's corner of the web.", noindex = false } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL('/images/og.jpg', Astro.site);
@@ -134,7 +135,7 @@ const identity = graph && { '@context': 'https://schema.org', '@graph': graph };
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
     <link
       rel="alternate"
       type="application/rss+xml"
