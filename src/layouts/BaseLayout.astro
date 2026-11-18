@@ -12,31 +12,48 @@ const { title, description = "Oliver's corner of the web." } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL('/images/og.jpg', Astro.site);
 
-const identity = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'WebSite',
-      '@id': 'https://ohrt.dev/#website',
-      name: 'ohrt.dev',
-      url: 'https://ohrt.dev/',
-      author: { '@id': 'https://ohrt.dev/#me' },
-    },
-    {
-      '@type': 'Person',
-      '@id': 'https://ohrt.dev/#me',
-      name: 'Oliver Ohrt',
-      url: 'https://ohrt.dev/',
-      image: 'https://ohrt.dev/images/webmaster.webp',
-      sameAs: [
-        'https://github.com/Lavanic',
-        'https://www.linkedin.com/in/ohrt',
-        'https://www.instagram.com/oliverohrt',
-        'https://blog.ohrt.dev/',
-      ],
-    },
+const me = {
+  '@type': 'Person',
+  '@id': 'https://ohrt.dev/#me',
+  name: 'Oliver Ohrt',
+  givenName: 'Oliver',
+  familyName: 'Ohrt',
+  url: 'https://ohrt.dev/',
+  image: 'https://ohrt.dev/images/webmaster.webp',
+  mainEntityOfPage: { '@id': 'https://ohrt.dev/webmaster/#page' },
+  sameAs: [
+    'https://github.com/Lavanic',
+    'https://www.linkedin.com/in/ohrt',
+    'https://www.instagram.com/oliverohrt',
+    'https://devpost.com/Lavanic',
+    'https://grabcad.com/oliver.ohrt-1',
+    'https://www.youtube.com/@CalicoCoder',
+    'https://blog.ohrt.dev/',
   ],
 };
+const website = {
+  '@type': 'WebSite',
+  '@id': 'https://ohrt.dev/#website',
+  name: 'ohrt.dev',
+  alternateName: 'Oliver Ohrt',
+  url: 'https://ohrt.dev/',
+  author: { '@id': 'https://ohrt.dev/#me' },
+};
+const graphs: Record<string, object[]> = {
+  '/': [website, me],
+  '/webmaster/': [
+    {
+      '@type': 'ProfilePage',
+      '@id': 'https://ohrt.dev/webmaster/#page',
+      url: 'https://ohrt.dev/webmaster/',
+      isPartOf: { '@id': 'https://ohrt.dev/#website' },
+      mainEntity: { '@id': 'https://ohrt.dev/#me' },
+    },
+    me,
+  ],
+};
+const graph = graphs[Astro.url.pathname.replace(/\/?$/, '/')];
+const identity = graph && { '@context': 'https://schema.org', '@graph': graph };
 ---
 
 <html lang="en" transition:animate="none">
@@ -136,7 +153,7 @@ const identity = {
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="ohrt.dev, with gears in place of the two O's" />
     <meta name="twitter:card" content="summary_large_image" />
-    {Astro.url.pathname === '/' && <script is:inline type="application/ld+json" set:html={JSON.stringify(identity)} />}
+    {identity && <script is:inline type="application/ld+json" set:html={JSON.stringify(identity)} />}
     <link rel="preconnect" href="https://github-contributions-api.jogruber.de" crossorigin />
     <link rel="preconnect" href="https://ws.audioscrobbler.com" crossorigin />
     <link rel="preconnect" href={GOATCOUNTER} crossorigin />
