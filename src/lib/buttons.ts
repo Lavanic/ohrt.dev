@@ -12,6 +12,7 @@ export const BUTTON_LINKS: Record<string, ButtonLink> = {
   'internetarchive.gif': { href: 'https://archive.org/', label: 'Internet Archive' },
   'javanow.gif': { href: 'https://www.java.com/', label: 'Java' },
   'kdenews.gif': { href: 'https://kde.org/', label: 'KDE' },
+  'linux-p.gif': { href: 'https://kernel.org/', label: 'Linux' },
   'neocities-2.gif': { href: 'https://neocities.org/', label: 'Neocities' },
   'neocities-pink.gif': { href: 'https://neocities.org/', label: 'Neocities' },
   'neovim.gif': { href: 'https://neovim.io/', label: 'Neovim' },

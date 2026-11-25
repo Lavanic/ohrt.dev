@@ -1,5 +1,8 @@
 ---
+import { readdir } from 'node:fs/promises';
+import path from 'node:path';
 import SiteShell from '../layouts/SiteShell.astro';
+import { BUTTON_LINKS } from '../lib/buttons';
 
 const ELSEWHERE = [
   { name: 'GitHub', href: 'https://github.com/Lavanic', icon: 'github' },
@@ -11,6 +14,10 @@ const ELSEWHERE = [
   { name: 'Devpost', href: 'https://devpost.com/Lavanic', icon: 'devpost' },
   { name: 'Email', href: 'mailto:oliver@theohrts.com', icon: 'email' },
 ];
+
+const buttonDir = path.join(process.cwd(), 'public/buttons');
+const buttonFiles = (await readdir(buttonDir)).filter((f) => /\.(png|gif|jpe?g|webp|avif)$/i.test(f)).sort();
+const buttons = buttonFiles.map((f) => ({ src: `/buttons/${f}`, link: BUTTON_LINKS[f] }));
 ---
 
 <SiteShell title="links - ohrt.dev" description="Cool stuff + where to find Oliver elsewhere.">
@@ -34,10 +41,56 @@ const ELSEWHERE = [
       </a>
       .
     </p>
+    {buttons.length > 0 && (
+      <div class="wall">
+        {buttons.map(({ src, link }) =>
+          link ? (
+            <a
+              href={link.href}
+              target={link.href.startsWith('/') ? undefined : '_blank'}
+              rel={link.href.startsWith('/') ? undefined : 'noopener'}
+            >
+              <img src={src} width="88" height="31" alt={link.label} loading="lazy" decoding="async" />
+            </a>
+          ) : (
+            <img src={src} width="88" height="31" alt="" loading="lazy" decoding="async" />
+          ),
+        )}
+      </div>
+    )}
   </div>
 </SiteShell>
 
 <style>
+  .wall {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    --wall-gap: 4px;
+    --wall-cols: 8;
+    gap: var(--wall-gap);
+    margin-top: 20px;
+  }
+
+  .wall > * {
+    width: calc((100% - (var(--wall-cols) - 1) * var(--wall-gap)) / var(--wall-cols));
+  }
+
+  .wall a {
+    display: block;
+    line-height: 0;
+  }
+
+  .wall a img {
+    width: 100%;
+  }
+
+  .wall img {
+    display: block;
+    height: auto;
+    image-rendering: pixelated;
+  }
+
   .elsewhere-row {
     display: flex;
     align-items: center;
@@ -99,6 +152,19 @@ const ELSEWHERE = [
     .credit {
       margin-top: calc(4px / var(--scale));
       font-size: calc((12px - 3px * var(--phone)) / var(--scale));
+    }
+
+    .wall {
+      --wall-gap: calc(4px / var(--scale));
+      --wall-cols: 6;
+      margin-top: calc(16px / var(--scale));
+    }
+  }
+
+  /* a phone held upright has room for three */
+  @media (max-width: 600px) {
+    .wall {
+      --wall-cols: 3;
     }
   }
 </style>
